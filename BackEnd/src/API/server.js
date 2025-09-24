@@ -1,6 +1,6 @@
-const path = require('path')
+const path = require('path');
 const app = require('./app');
-const initDb = require('../Infrastructure/Persistence/initDb');
+const { initDb } = require('../Infrastructure/Persistence/initDb');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -14,12 +14,11 @@ const options = {
     info: {
       title: 'Find to Watch API',
       version: '1.0.0',
-      description:
-        'Esta é uma API documentada com Swagger',
+      description: 'Esta é uma API documentada com Swagger',
     },
     servers: [
       {
-        url: `http://localhost:${PORT}/api`, 
+        url: `http://localhost:${PORT}/api`,
       },
     ],
     components: {
@@ -45,7 +44,7 @@ const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 async function startServer() {
-  await initDb(); 
+  await initDb();
   app.listen(PORT, () => {
     console.log(`Server rodando em http://localhost:${PORT}/api-docs`);
   });
