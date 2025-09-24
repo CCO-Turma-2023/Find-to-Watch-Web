@@ -1,6 +1,6 @@
 const path = require('path')
 const app = require('./app');
-const initDb = require('./config/initDb');
+const initDb = require('../Infrastructure/Persistence/initDb');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -12,7 +12,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Gestão Financeira API',
+      title: 'Find to Watch API',
       version: '1.0.0',
       description:
         'Esta é uma API documentada com Swagger',
