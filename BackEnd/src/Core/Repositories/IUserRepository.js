@@ -1,18 +1,9 @@
-
 /**
  * @interface
  * Interface para o Repositório de Usuários, definindo um contrato
  * para as operações de dados relacionadas a usuários.
  */
 class IUserRepository {
-  /**
-   * Retorna todos os usuários.
-   * @returns {Promise<User[]>} Uma lista de usuários.
-   */
-  findAll() {
-    throw new Error("Método 'findAll' não implementado");
-  }
-
   /**
    * Encontra um usuário pelo seu email.
    * @param {string} email - O email do usuário.
