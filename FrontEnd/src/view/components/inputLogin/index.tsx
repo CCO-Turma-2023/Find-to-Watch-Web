@@ -12,15 +12,25 @@ export default function LoginForm({
   setData: React.Dispatch<React.SetStateAction<loginProps>>;
   data: loginProps;
 }) {
-  const properties = {
-    value: type === "email" ? data.email : data.password,
-  };
+  let properties = null;
+  let typeInput = "text";
+
+  if (type === "confirmPassword") {
+    properties = data.confirmPassword;
+    typeInput = "password";
+  } else if (type === "email") {
+    properties = data.email;
+    typeInput = "email";
+  } else {
+    properties = data.password;
+    typeInput = "password";
+  }
 
   return (
     <div className="h-[3.5rem] w-[22rem]">
       <input
-        type={type}
-        value={properties.value}
+        type={typeInput}
+        value={properties}
         onChange={(e) => setData({ ...data, [type]: e.target.value })}
         placeholder={textDefault}
         className="h-full w-full rounded-[3.25rem] bg-[#F6F6F6] px-4"

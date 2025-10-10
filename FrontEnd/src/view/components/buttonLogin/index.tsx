@@ -7,15 +7,29 @@ export default function ButtonLogin({
   type: string;
   handleClick: (type: string) => void;
 }) {
-  const properties = {
-    text: type === "createAccount" ? "Criar conta" : "Entrar",
-    backgroundColor: type === "createAccount" ? "#191919" : "#00925D",
-  };
+  let text = "";
+  let backgroundColor = "";
+
+  if (type === "createAccount") {
+    text = "Criar conta";
+    if (document.location.pathname === "/register") {
+      backgroundColor = "#00925D";
+    } else {
+      backgroundColor = "#191919";
+    }
+  } else if (type === "login") {
+    text = "Entrar";
+    backgroundColor = "#00925D";
+  } else {
+    text = "Cancelar";
+    backgroundColor = "#191919";
+  }
+
   return (
     <motion.button
       className="h-[2.5rem] w-[9.375rem] rounded-full"
       style={{
-        background: properties.backgroundColor,
+        background: backgroundColor,
       }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -23,7 +37,7 @@ export default function ButtonLogin({
         handleClick(type);
       }}
     >
-      <span className="text-[1rem] text-white">{properties.text}</span>
+      <span className="text-[1rem] text-white">{text}</span>
     </motion.button>
   );
 }

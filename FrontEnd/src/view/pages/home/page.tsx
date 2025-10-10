@@ -1,3 +1,13 @@
+import loginImage from "../../assets/background.png";
+import HomeLayout from "../../layouts/home";
+
 export default function Home() {
-  return <div className="h-screen w-full bg-black">Opa</div>;
+  return (
+    <div
+      className={`flex h-screen w-full justify-end bg-cover bg-center`}
+      style={{ backgroundImage: `url(${loginImage})` }}
+    >
+      <HomeLayout />
+    </div>
+  );
 }
