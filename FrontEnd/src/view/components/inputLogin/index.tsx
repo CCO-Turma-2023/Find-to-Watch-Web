@@ -1,5 +1,6 @@
 import React from "react";
 import type { loginProps } from "../../../app/interfaces/login";
+import { Password } from 'primereact/password';
 
 export default function LoginForm({
   type,
@@ -12,7 +13,7 @@ export default function LoginForm({
   setData: React.Dispatch<React.SetStateAction<loginProps>>;
   data: loginProps;
 }) {
-  let properties = null;
+  let properties: string | undefined = "";
   let typeInput = "text";
 
   if (type === "confirmPassword") {
@@ -21,20 +22,39 @@ export default function LoginForm({
   } else if (type === "email") {
     properties = data.email;
     typeInput = "email";
-  } else {
+  } else if (type === "password") {
     properties = data.password;
     typeInput = "password";
+  } else {
+    properties = data.username;
   }
 
   return (
     <div className="h-[3.5rem] w-[22rem]">
-      <input
-        type={typeInput}
-        value={properties}
-        onChange={(e) => setData({ ...data, [type]: e.target.value })}
-        placeholder={textDefault}
-        className="h-full w-full rounded-[3.25rem] bg-[#F6F6F6] px-4"
-      />
+      {typeInput === "password" ? (
+        <Password
+          value={properties}
+          onChange={(e) => setData({ ...data, [type]: e.target.value })}
+          placeholder={textDefault}
+          toggleMask
+          feedback={false}
+          pt={{
+            root: { className: '!h-full ' },
+            
+            input: {
+              className: '!h-full !w-[22rem] !rounded-[3.25rem] !bg-[#F6F6F6] !px-4 !border-none',
+            },
+          }}
+        />
+      ) : (
+        <input
+          type={typeInput}
+          value={properties}
+          onChange={(e) => setData({ ...data, [type]: e.target.value })}
+          placeholder={textDefault}
+          className="h-full w-full rounded-[3.25rem] bg-[#F6F6F6] px-4"
+        />
+      )}
     </div>
   );
 }

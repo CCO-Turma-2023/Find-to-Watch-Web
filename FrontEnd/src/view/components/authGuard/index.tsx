@@ -8,7 +8,7 @@ const useAuth = () => {
 const AuthGuard = () => {
   const isAuth = useAuth();
 
-  return isAuth ? <Outlet /> : <Navigate to="/login" replace />;
+  return isAuth ? <Outlet /> : <Navigate to="/auth" replace />;
 };
 
 export default AuthGuard;

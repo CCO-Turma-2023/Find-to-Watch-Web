@@ -13,6 +13,10 @@ class IUserRepository {
     throw new Error("Método 'findByEmail' não implementado");
   }
 
+  findByUsername(username) {
+    throw new Error("Método 'findByUsername' não implementado");
+  }
+
   /**
    * Encontra um usuário pelo seu ID.
    * @param {string} id - O ID do usuário.

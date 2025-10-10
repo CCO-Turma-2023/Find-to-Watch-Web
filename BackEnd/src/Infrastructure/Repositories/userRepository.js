@@ -13,6 +13,16 @@ class UserRepository extends IUserRepository {
     return new User(rows[0]);
   }
 
+  async findByUsername(username) {
+    const { rows } = await db.query("SELECT * FROM usuarios WHERE username = $1", [
+      username,
+    ]);
+    if (rows.length === 0) {
+      return null;
+    }
+    return new User(rows[0]);
+  }
+
   async findById(id) {
     const { rows } = await db.query(
       "SELECT id, username, email, created_at, updated_at FROM usuarios WHERE id = $1",
@@ -25,10 +35,10 @@ class UserRepository extends IUserRepository {
   }
 
   async create(user) {
-    const { id, email, passwordHash } = user;
+    const { id, username, email, passwordHash } = user;
     await db.query(
-      "INSERT INTO usuarios (id, email, passwordHash) VALUES ($1, $2, $3)",
-      [id, email, passwordHash]
+      "INSERT INTO usuarios (id, username, email, passwordHash) VALUES ($1, $2, $3, $4)",
+      [id, username, email, passwordHash]
     );
     return this.findById(id);
   }

@@ -2,9 +2,11 @@ import { motion } from "framer-motion";
 
 export default function ButtonLogin({
   type,
+  form,
   handleClick,
 }: {
   type: string;
+  form: string
   handleClick: (type: string) => void;
 }) {
   let text = "";
@@ -12,7 +14,7 @@ export default function ButtonLogin({
 
   if (type === "createAccount") {
     text = "Criar conta";
-    if (document.location.pathname === "/register") {
+    if (form === "register") {
       backgroundColor = "#00925D";
     } else {
       backgroundColor = "#191919";

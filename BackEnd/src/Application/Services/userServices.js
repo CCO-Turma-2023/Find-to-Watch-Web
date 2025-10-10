@@ -9,17 +9,17 @@ class UserServices {
 
   async login({ email, password }) {
     if (!email || !password) {
-      throw new Error("Email e password são obrigatórios.");
+      throw new Error("Email e senha são obrigatórios.");
     }
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new Error("Email ou password inválidos.");
+      throw new Error("Email ou senha inválidos.");
     }
 
     const isPasswordEqual = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordEqual) {
-      throw new Error("Email ou password inválidos.");
+      throw new Error("Email ou senha inválidos.");
     }
 
     const payload = {
@@ -34,17 +34,37 @@ class UserServices {
     return { token };
   }
 
-  async createUser({ email, password }) {
-    if (!email || !password) {
-      throw new Error("Todos os campos são obrigatórios.");
+  async createUser({ username, email, password }) {
+    if (!username || !email || !password) {
+      throw new Error();
     }
-    const existingUser = await this.userRepository.findByEmail(email);
+
+    let existingUser = await this.userRepository.findByEmail(email);
+
     if (existingUser) {
       throw new Error("Este email já está em uso.");
     }
+
+    existingUser = await this.userRepository.findByUsername(username);
+
+    if (existingUser) {
+      throw new Error("Este username já está em uso.");
+    }
+    
     const id = uuidv4();
     const passwordHash = bcrypt.hashSync(password, 10);
-    return this.userRepository.create({ id, email, passwordHash });
+    const user = this.userRepository.create({ id, username, email, passwordHash });
+
+    const payload = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "8h",
+    });
+    return { token };
   }
 
   async getMe(id) {

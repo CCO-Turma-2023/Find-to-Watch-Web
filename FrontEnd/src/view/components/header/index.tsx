@@ -1,7 +1,14 @@
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import NavButtons from "../navButtons";
 
 export default function HeaderPage() {
+  const navigate = useNavigate(); 
+  
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/auth")
+  }
+
   return (
     <header className="mt-[4.78rem] flex w-full items-center justify-evenly gap-[5rem] text-white">
       <h1>FIND TO WATCH</h1>
@@ -14,10 +21,7 @@ export default function HeaderPage() {
       <div>
         <button
           className="h-[2.5rem] w-[8.125rem] bg-[#00925D]"
-          onClick={() => {
-            localStorage.removeItem("token");
-            window.location.replace("/login");
-          }}
+          onClick={logout}
         >
           Logout
         </button>

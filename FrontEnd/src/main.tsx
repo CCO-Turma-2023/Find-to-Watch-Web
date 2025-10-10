@@ -1,3 +1,5 @@
+// Seu arquivo de entrada (main.tsx ou index.tsx)
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { PrimeReactProvider } from "primereact/api";
@@ -6,17 +8,17 @@ import "primereact/resources/themes/lara-light-green/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import { BrowserRouter } from "react-router-dom";
-import { MainProvider } from "./app/contexts/mainContext.tsx";
 import App from "./App.tsx";
+import { ToastProvider } from "./app/contexts/toastContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <PrimeReactProvider>
-    <MainProvider>
-      <StrictMode>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </StrictMode>
-    </MainProvider>
+      <ToastProvider> 
+        <StrictMode>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </StrictMode>
+      </ToastProvider>
   </PrimeReactProvider>,
 );
