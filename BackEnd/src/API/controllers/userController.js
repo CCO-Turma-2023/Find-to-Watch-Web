@@ -13,6 +13,21 @@ class UserController {
     }
   }
 
+  async googleLogin(req, res) {
+    try {
+      const { code } = req.body;
+      if (!code) {
+        return res.status(400).json({ message: "Código de autorização não fornecido." });
+      }
+    
+      const result = await userServices.loginOrRegisterWithGoogle({ code });
+      
+      return res.status(200).json(result);
+    } catch (error) {
+      return res.status(401).json({ message: error.message || "Falha na autenticação com Google." });
+    }
+  }
+
   async createUser(req, res) {
     try {
       const newUser = await userServices.createUser(req.body);

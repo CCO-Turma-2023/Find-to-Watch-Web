@@ -1,11 +1,21 @@
 const db = require("../Persistence/config");
-const User = require("../../Core/Entities/User");
+const User = require("../../Core/Entities/user");
 const IUserRepository = require("../../Core/Repositories/IUserRepository");
 
 class UserRepository extends IUserRepository {
   async findByEmail(email) {
     const { rows } = await db.query("SELECT * FROM usuarios WHERE email = $1", [
       email,
+    ]);
+    if (rows.length === 0) {
+      return null;
+    }
+    return new User(rows[0]);
+  }
+
+  async findByGoogleId(googleId) {
+    const { rows } = await db.query('SELECT * FROM usuarios WHERE googleid = $1', [
+      googleId,
     ]);
     if (rows.length === 0) {
       return null;
@@ -25,7 +35,7 @@ class UserRepository extends IUserRepository {
 
   async findById(id) {
     const { rows } = await db.query(
-      "SELECT id, username, email, created_at, updated_at FROM usuarios WHERE id = $1",
+      "SELECT id, username, email, googleId, authProvider created_at, updated_at FROM usuarios WHERE id = $1",
       [id]
     );
     if (rows.length === 0) {
@@ -35,11 +45,24 @@ class UserRepository extends IUserRepository {
   }
 
   async create(user) {
-    const { id, username, email, passwordHash } = user;
-    await db.query(
-      "INSERT INTO usuarios (id, username, email, passwordHash) VALUES ($1, $2, $3, $4)",
-      [id, username, email, passwordHash]
-    );
+    const { id, username, email, passwordHash, googleId, authProvider } = user;
+
+    const query = `
+    INSERT INTO usuarios (id, username, email, passwordHash, googleid, authprovider) 
+    VALUES ($1, $2, $3, $4, $5, $6)
+    `;
+
+    const values = [
+      id, 
+      username, 
+      email, 
+      passwordHash || null, 
+      googleId || null, 
+      authProvider || 'local'
+    ];
+
+    await db.query(query, values);
+
     return this.findById(id);
   }
 

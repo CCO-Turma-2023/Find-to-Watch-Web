@@ -1,14 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
-
-const useAuth = () => {
-  const token = localStorage.getItem("token");
-  return token ? true : false;
-};
+import { isTokenValid } from "../../../app/services/api.service";
 
 const AuthGuard = () => {
-  const isAuth = useAuth();
-
-  return isAuth ? <Outlet /> : <Navigate to="/auth" replace />;
+  return isTokenValid() ? <Outlet /> : <Navigate to="/auth" replace />;
 };
 
 export default AuthGuard;

@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 
 class UserServices {
   constructor(userRepository) {
@@ -34,7 +35,72 @@ class UserServices {
     return { token };
   }
 
-  async createUser({ username, email, password }) {
+  async loginOrRegisterWithGoogle({ code }) {
+    try {
+      const client = new OAuth2Client(
+        process.env.VITE_GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        "postmessage"
+      );
+
+      const { tokens } = await client.getToken(code);
+      const idToken = tokens.id_token;
+
+      if (!idToken) {
+        throw new Error("Não foi possível obter o ID Token do Google.");
+      }
+
+      const ticket = await client.verifyIdToken({
+        idToken: idToken,
+        audience: process.env.VITE_GOOGLE_CLIENT_ID,
+      });
+
+      const googlePayload = ticket.getPayload();
+
+      if (!googlePayload) {
+        throw new Error("Payload do Google inválido.");
+      }
+
+      const { sub: googleId, email, name: username } = googlePayload;
+
+      let user = await this.userRepository.findByGoogleId(googleId);
+
+      if (!user) {
+        const existingUserByEmail = await this.userRepository.findByEmail(email);
+        if (existingUserByEmail) {
+          throw new Error("Este e-mail já está cadastrado. Faça login com sua senha.");
+        }
+
+        const id = uuidv4();
+        user = await this.userRepository.create({
+          id,
+          googleId,
+          email,
+          username,
+          passwordHash: null,
+          authProvider: 'google',
+        });
+      }
+
+      const payload = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "8h",
+      });
+      
+      return { token };
+
+    } catch (error) {
+      console.error("Erro na autenticação com Google:", error);
+      throw new Error("Falha ao autenticar com o Google.");
+    }
+  }
+
+  async createUser({ username, email, password, isGoogle }) {
     if (!username || !email || !password) {
       throw new Error();
     }
@@ -59,6 +125,7 @@ class UserServices {
       id: user.id,
       username: user.username,
       email: user.email,
+      authProvider: 'local'
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {

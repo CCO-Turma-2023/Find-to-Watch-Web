@@ -11,17 +11,17 @@ const pool = new Pool({
 
 async function initDb() {
   try {
-    // Cria a tabela usuarios
     await pool.query(`
       CREATE TABLE IF NOT EXISTS usuarios (
         id UUID PRIMARY KEY,
         username VARCHAR(100),
         email VARCHAR(100) NOT NULL UNIQUE,
-        passwordHash VARCHAR(255) NOT NULL,
+        passwordHash VARCHAR(255),
+        googleId VARCHAR(255) UNIQUE, 
+        authProvider VARCHAR(50) NOT NULL DEFAULT 'local',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+      `);
 
     console.log("Banco inicializado com sucesso!");
   } catch (error) {

@@ -85,6 +85,50 @@ router.post("/", userController.createUser);
 
 /**
  * @swagger
+ * /users/google:
+ *   post:
+ *     summary: Realiza o login ou registro de um usuário com o Google
+ *     tags: [Users]
+ *     description: |
+ *       Autentica um usuário usando um token de acesso do Google.  
+ *       Se o usuário não existir no banco de dados, um novo usuário será criado com as informações do perfil do Google.  
+ *       Se o usuário já existir, ele será logado e um token JWT será retornado.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: O token de acesso (access_token) fornecido pelo Google após o login do usuário.
+ *                 example: "ya29.a0AfH6SMD..."
+ *     responses:
+ *       200:
+ *         description: Login ou registro realizado com sucesso, retorna o token JWT da sua aplicação.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: Token JWT para ser usado em rotas autenticadas.
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       400:
+ *         description: O token do Google não foi fornecido no corpo da requisição.
+ *       401:
+ *         description: O token do Google é inválido ou expirou.
+ *       500:
+ *         description: Erro interno no servidor.
+ */
+router.post("/google", userController.googleLogin);
+
+/**
+ * @swagger
  * /users/login:
  *   post:
  *     summary: Realiza o login do usuário

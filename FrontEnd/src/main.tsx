@@ -10,14 +10,19 @@ import "primeicons/primeicons.css";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import { ToastProvider } from "./app/contexts/toastContext.tsx";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById("root")!).render(
   <PrimeReactProvider>
       <ToastProvider> 
         <StrictMode>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <GoogleOAuthProvider clientId={googleClientId}>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </GoogleOAuthProvider>
         </StrictMode>
       </ToastProvider>
   </PrimeReactProvider>,
