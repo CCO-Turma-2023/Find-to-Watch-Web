@@ -71,7 +71,7 @@ export default function RegisterLayout({ onNavigateToLogin }: RegisterLayoutProp
       const registered = await authenticationRegister(data, handleMessage);
 
       if(registered){
-        navigate("/home");
+        navigate("/");
       }
 
     } else {

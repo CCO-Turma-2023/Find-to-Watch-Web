@@ -16,11 +16,9 @@ export default function App() {
       <Routes location={location} key={location.pathname}>
         <Route path="/auth" element={<AuthPage />} />
         <Route path="*" element={<Default />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
 
         <Route element={<AuthGuard />}>
-          <Route path="/" element={<Home />} />
-
           <Route path="/series" element={<SeriesPage />} />
           <Route path="/movies" element={<MoviesPage />} />
           <Route path="/cinema" element={<CinemaPage />} />

@@ -68,7 +68,7 @@ export default function LoginLayout({ onNavigateToLogin}: LoginLayoutProps) {
       const login = await authenticationLogin(data, handleMessage);
 
       if(login){
-        navigate("/home");
+        navigate("/");
       }
     }
   }

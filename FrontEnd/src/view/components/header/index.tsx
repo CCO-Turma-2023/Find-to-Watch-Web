@@ -7,7 +7,6 @@ import {
   type DecodedToken,
 } from "../../../app/services/api.service";
 import Buttons from "../buttons";
-import { div } from "framer-motion/client";
 import PerfilOptions from "../perfilOptions";
 
 export default function HeaderPage() {
@@ -29,7 +28,7 @@ export default function HeaderPage() {
     >
       <h1>FIND TO WATCH</h1>
       <div className="flex items-center justify-center gap-[1rem]">
-        <NavButtons title="Home" route="/home" />
+        <NavButtons title="Home" route="/" />
         <NavButtons title="Séries" route="/series" />
         <NavButtons title="Filmes" route="/movies" />
         <NavButtons title="Cinema" route="/cinema" />

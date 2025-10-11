@@ -4,9 +4,9 @@ export interface Media {
   title: string;
   overview: string;
   type: string;
-  duration?: string;
-  genres?: string[];
-  year?: string;
+  runtime: string;
+  genres: string[];
+  year: string;
 }
 
 export interface fetchMediaProps {

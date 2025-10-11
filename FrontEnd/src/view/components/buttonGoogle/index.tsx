@@ -27,7 +27,7 @@ export default function ButtonGoogle() {
       );
 
       if (success) {
-        navigate("/home"); 
+        navigate("/"); 
       }
     },
     onError: (error) => {
