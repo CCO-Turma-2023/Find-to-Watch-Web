@@ -5,8 +5,9 @@ import { FaGear } from "react-icons/fa6";
 import { MdLogout } from "react-icons/md";
 import { VscTriangleDown } from "react-icons/vsc";
 import { useNavigate } from "react-router-dom";
+import type { DecodedToken } from "../../../app/services/api.service";
 
-export default function PerfilOptions() {
+export default function PerfilOptions({ info }: { info: DecodedToken | null }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 
@@ -14,7 +15,7 @@ export default function PerfilOptions() {
     localStorage.removeItem("token");
     navigate("/auth");
   };
-
+  const Freya = "Freya"; // Nome de usuário fictício
   const options = [
     {
       icon: <CgProfile />,
@@ -55,7 +56,7 @@ export default function PerfilOptions() {
             }}
           >
             <span className="flex w-full items-center gap-2 p-3 text-left text-white">
-              Olá, Freya!
+              Olá, {info?.username}!
             </span>
             {options.map((option, index) => (
               <button

@@ -4,22 +4,30 @@ const tmdbRequests = require("../../Infrastructure/Utils/TmdbRequests/tmdbReques
 const tmdbServices = new TmdbServices(tmdbRequests);
 
 class TmdbController {
-    async fetchCategory(req, res) {
-        try {
-            const { mediaType, genreId, page } = req.query;
-            
-            if (!mediaType) {
-                return res.status(400).json({ message: "O parâmetro 'mediaType' é obrigatório." });
-            }
+  async fetchCategory(req, res) {
+    try {
+      const { mediaType, genreId, page } = req.body;
 
-            const result = await tmdbServices.fetchCategory({ mediaType, genreId, page });
-            
-            return res.status(200).json(result);
-        } catch (error) {
-            console.error("Erro ao buscar categoria:", error);
-            return res.status(500).json({ message: error.message || "Ocorreu um erro interno no servidor." });
-        }
+      if (!mediaType) {
+        return res
+          .status(400)
+          .json({ message: "O parâmetro 'mediaType' é obrigatório." });
+      }
+
+      const result = await tmdbServices.fetchCategory({
+        mediaType,
+        genreId,
+        page,
+      });
+
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Erro ao buscar categoria:", error);
+      return res.status(500).json({
+        message: error.message || "Ocorreu um erro interno no servidor.",
+      });
     }
+  }
 }
 
 module.exports = new TmdbController();

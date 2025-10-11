@@ -57,54 +57,45 @@ const router = Router();
  *         release_date: "2019-04-24"
  */
 
-
 /**
  * @swagger
  * /tmdb/category:
- *   get:
+ *   post:
  *     summary: Busca mídias por categoria, gênero e página
  *     tags: [TMDB]
  *     description: |
- *       Retorna uma lista de filmes ou séries com base nos filtros fornecidos.
- *       - Se `genreId` não for fornecido, a rota retornará os itens em alta (trending) do dia.
- *       - Se `genreId` for fornecido, a busca será feita com filtros específicos para garantir a qualidade dos resultados.
- *     parameters:
- *       - in: query
- *         name: mediaType
- *         schema:
- *           type: string
- *           enum: [movie, tv]
- *         required: true
- *         description: O tipo de mídia a ser buscado ('movie' para filmes, 'tv' para séries).
- *       - in: query
- *         name: genreId
- *         schema:
- *           type: integer
- *         required: false
- *         description: O ID do gênero do TMDb. Se não for fornecido, busca os mais populares (trending).
- *         example: 28
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         required: false
- *         description: O número da página para a paginação dos resultados.
+ *       Retorna uma lista de filmes ou séries com base nos filtros enviados no corpo da requisição.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mediaType:
+ *                 type: string
+ *                 enum: [movie, tv]
+ *               genreId:
+ *                 type: integer
+ *                 nullable: true
+ *               page:
+ *                 type: integer
+ *                 default: 1
+ *             required:
+ *               - mediaType
+ *             example:
+ *               mediaType: "movie"
+ *               genreId: 28
+ *               page: 1
  *     responses:
  *       200:
- *         description: Uma lista de mídias foi retornada com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Media'
+ *         description: Lista de mídias retornada com sucesso
  *       400:
- *         description: Parâmetro 'mediaType' ausente ou inválido.
+ *         description: Parâmetro 'mediaType' ausente ou inválido
  *       500:
- *         description: Erro interno no servidor ao tentar buscar os dados no TMDb.
+ *         description: Erro interno no servidor
  */
 
-router.get("/category", tmdbController.fetchCategory);
+router.post("/category", tmdbController.fetchCategory);
 
 module.exports = router;

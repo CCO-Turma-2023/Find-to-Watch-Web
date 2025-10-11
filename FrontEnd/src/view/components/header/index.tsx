@@ -1,18 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import NavButtons from "../navButtons";
-import { useEffect } from "react";
-import { isTokenValid } from "../../../app/services/api.service";
+import { useEffect, useState } from "react";
+import {
+  decodeToken,
+  isTokenValid,
+  type DecodedToken,
+} from "../../../app/services/api.service";
 import Buttons from "../buttons";
 import { div } from "framer-motion/client";
 import PerfilOptions from "../perfilOptions";
 
 export default function HeaderPage() {
+  const [infoToken, setInfoToken] = useState<DecodedToken | null>(null);
   const navigate = useNavigate();
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/auth");
-  };
+  useEffect(() => {
+    const token = decodeToken();
+    setInfoToken(token ?? null);
+  }, []);
 
   return (
     <header
@@ -31,7 +36,7 @@ export default function HeaderPage() {
       </div>
       <div>
         {isTokenValid() ? (
-          <PerfilOptions></PerfilOptions>
+          <PerfilOptions info={infoToken} />
         ) : (
           <div className="flex gap-2">
             <Buttons
