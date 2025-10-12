@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import HeaderPage from "../../components/header";
 import ContentType from "../../components/contentType";
@@ -35,23 +35,26 @@ const contentVariants = {
   }),
 };
 
+
 export default function HomeLayout() {
   const [contentInfo, setContentInfo] = useState<Media[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [indexSelected, setIndexSelected] = useState(0);
   const [direction, setDirection] = useState<"left" | "right">("right");
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setDirection("right");
     setIndexSelected((prev) =>
-      prev === contentInfo.length - 1 ? prev : prev + 1,
+      prev === contentInfo.length - 1 ? 0 : prev + 1
     );
-  };
+  }, [contentInfo.length]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setDirection("left");
-    setIndexSelected((prev) => (prev === 0 ? 0 : prev - 1));
-  };
+    setIndexSelected((prev) =>
+      prev === 0 ? contentInfo.length - 1 : prev - 1
+    );
+  }, [contentInfo.length]);
 
   useEffect(() => {
     const fetchRandomMedia = async () => {
@@ -91,6 +94,16 @@ export default function HomeLayout() {
     fetchRandomMedia();
   }, []);
 
+  useEffect(() => {
+    if (contentInfo.length === 0 || isLoading) return;
+
+    const timer = setInterval(() => {
+      handleNext();
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, [contentInfo.length, isLoading, indexSelected, handleNext]);
+
   const backgroundStyle = {
     backgroundImage:
       contentInfo.length > 0 && contentInfo[indexSelected]?.backdrop_path
@@ -101,9 +114,8 @@ export default function HomeLayout() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-black">
-      <div className="relative z-30">
-        {" "}
+    <div className="relative min-h-screen w-full overflow-hidden bg-black">
+      <div className="absolute top-0 left-0 right-0 z-30">
         <HeaderPage />
       </div>
 
@@ -120,15 +132,16 @@ export default function HomeLayout() {
             transition={{ opacity: { duration: 0.8, ease: "easeInOut" } }}
           />
         </AnimatePresence>
-
         <div className="absolute inset-0 bg-black/50" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
       </div>
 
-      <div className="relative z-20 flex h-full flex-col justify-center">
-        <div className="flex h-full w-full items-center justify-between px-6">
+      
+      <div className="relative z-20 flex min-h-screen flex-col justify-end pb-8 md:justify-center">
+        
+        <div className="flex w-full items-center justify-between px-6">
           <motion.button
-            className={`flex h-12 w-12 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] ${indexSelected <= 0 ? "hidden" : ""}`}
+            className={`flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12 `}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePrev}
@@ -136,8 +149,10 @@ export default function HomeLayout() {
             <LeftArrow />
           </motion.button>
 
-          <div className="flex w-full flex-grow flex-col items-start justify-center gap-2 overflow-hidden px-6 md:px-12 lg:px-26">
-            <div className="relative flex max-h-[400px] min-h-[320px] w-full max-w-lg flex-col gap-4 p-4 md:max-w-xl">
+         
+          <div className="flex w-full flex-grow flex-col items-start justify-center overflow-hidden px-4 sm:px-6 md:px-12">
+            
+            <div className="relative flex min-h-[380px] w-full max-w-xs flex-col justify-end sm:max-w-md md:max-w-xl lg:max-w-2xl">
               <AnimatePresence mode="wait" custom={direction}>
                 {!isLoading &&
                 contentInfo.length > 0 &&
@@ -155,6 +170,7 @@ export default function HomeLayout() {
                     }}
                     className="w-full"
                   >
+                    
                     <ContentType
                       type={
                         contentInfo[indexSelected].type === "movie"
@@ -162,7 +178,7 @@ export default function HomeLayout() {
                           : "Série"
                       }
                     />
-                    <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
+                    <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
                       {contentInfo[indexSelected].title}
                     </h2>
                     <div className="text-opacity-80 mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white">
@@ -171,20 +187,20 @@ export default function HomeLayout() {
                           info={contentInfo[indexSelected].year}
                           bool={
                             !!contentInfo[indexSelected].runtime ||
-                            (contentInfo[indexSelected].genres?.length ?? 0) > 0
+                            (contentInfo[indexSelected].genres?.length ??
+                              0) > 0
                           }
                         />
                       )}
-
                       {contentInfo[indexSelected].runtime && (
                         <ContentInfos
                           info={contentInfo[indexSelected].runtime}
                           bool={
-                            (contentInfo[indexSelected].genres?.length ?? 0) > 0
+                            (contentInfo[indexSelected].genres?.length ??
+                              0) > 0
                           }
                         />
                       )}
-
                       {contentInfo[indexSelected].genres?.map(
                         (genre, index) => (
                           <ContentInfos
@@ -198,30 +214,29 @@ export default function HomeLayout() {
                         ),
                       )}
                     </div>
-                    <p className="mt-4 line-clamp-6 text-gray-200">
+                    <p className="mt-4 text-gray-200 line-clamp-3 sm:line-clamp-4 md:line-clamp-5">
                       {contentInfo[indexSelected].overview}
                     </p>
-                    <div className="select-non mt-4 flex items-center justify-start gap-4">
+                    <div className="select-non mt-4 flex flex-col items-start justify-start gap-4 sm:flex-row">
                       <motion.button
-                        className="flex h-[3.125rem] w-[11.3125rem] cursor-pointer items-center justify-center gap-2 rounded-full bg-[#03915E]"
+                        className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#03915E] sm:w-[11.3125rem]"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white">
                           <PlayIcon />
                         </div>
-                        <span className="text-xl font-bold text-white">
+                        <span className="text-lg font-bold text-white sm:text-xl">
                           Ver Trailer
                         </span>
                       </motion.button>
-
                       <motion.button
-                        className="flex h-[3.125rem] w-[11.3125rem] cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-white"
+                        className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-white sm:w-[11.3125rem]"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <MarkerIcon />
-                        <span className="text-xl font-bold text-white">
+                        <span className="text-lg font-bold text-white sm:text-xl">
                           Lista
                         </span>
                       </motion.button>
@@ -236,19 +251,20 @@ export default function HomeLayout() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="mt-8 flex w-full items-center justify-center text-white">
-              <ContentPlatform />
-            </div>
           </div>
 
           <motion.button
-            className={`flex h-12 w-12 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] ${indexSelected === contentInfo.length - 1 ? "hidden" : ""}`}
+            className={`flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12 `}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleNext}
           >
             <RightArrow />
           </motion.button>
+        </div>
+
+        <div className="mt-8 flex w-full items-center justify-center px-6">
+          <ContentPlatform />
         </div>
       </div>
     </div>
