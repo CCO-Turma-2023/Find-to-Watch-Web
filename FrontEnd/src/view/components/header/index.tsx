@@ -8,6 +8,7 @@ import {
 } from "../../../app/services/api.service";
 import Buttons from "../buttons";
 import PerfilOptions from "../perfilOptions";
+import logo from "../../assets/logo.png";
 
 export default function HeaderPage() {
   const [infoToken, setInfoToken] = useState<DecodedToken | null>(null);
@@ -26,7 +27,8 @@ export default function HeaderPage() {
           "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(2, 2, 2, 0.5) 50%, rgba(2, 2, 2, 0.10) 100%)",
       }}
     >
-      <h1>FIND TO WATCH</h1>
+      <img className="h-14 w-26" src={logo} alt="" />
+
       <div className="flex items-center justify-center gap-[1rem]">
         <NavButtons title="Home" route="/" />
         <NavButtons title="Séries" route="/series" />

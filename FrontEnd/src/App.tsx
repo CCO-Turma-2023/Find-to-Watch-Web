@@ -17,12 +17,11 @@ export default function App() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="*" element={<Default />} />
         <Route path="/" element={<Home />} />
+        <Route path="/series" element={<SeriesPage />} />
+        <Route path="/movies" element={<MoviesPage />} />
+        <Route path="/cinema" element={<CinemaPage />} />
 
-        <Route element={<AuthGuard />}>
-          <Route path="/series" element={<SeriesPage />} />
-          <Route path="/movies" element={<MoviesPage />} />
-          <Route path="/cinema" element={<CinemaPage />} />
-        </Route>
+        <Route element={<AuthGuard />}></Route>
       </Routes>
     </AnimatePresence>
   );

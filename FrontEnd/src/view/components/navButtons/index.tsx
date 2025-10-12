@@ -18,7 +18,7 @@ export default function NavButtons({ title, route }: NavButtonsProps) {
       onClick={() => {
         window.location.replace(route);
       }}
-      className="text-[1.25rem] font-medium"
+      className="cursor-pointer text-[1.25rem] font-medium"
       style={{
         color: isActive ? "white" : "#FFFFFFB2",
       }}

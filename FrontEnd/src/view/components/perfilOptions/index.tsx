@@ -15,7 +15,6 @@ export default function PerfilOptions({ info }: { info: DecodedToken | null }) {
     localStorage.removeItem("token");
     navigate("/auth");
   };
-  const Freya = "Freya"; // Nome de usuário fictício
   const options = [
     {
       icon: <CgProfile />,
@@ -39,7 +38,7 @@ export default function PerfilOptions({ info }: { info: DecodedToken | null }) {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="h-[3.5rem] w-[3.5rem] rounded-full bg-white"
+        className="h-[3.5rem] w-[3.5rem] cursor-pointer rounded-full bg-white"
         onClick={() => setIsOpen(!isOpen)}
       ></motion.button>
 
@@ -61,7 +60,7 @@ export default function PerfilOptions({ info }: { info: DecodedToken | null }) {
             {options.map((option, index) => (
               <button
                 key={index}
-                className="flex w-full items-center gap-2 p-3 text-left text-white hover:bg-white/10"
+                className="flex w-full cursor-pointer items-center gap-2 p-3 text-left text-white hover:bg-white/10"
                 onClick={option.action}
               >
                 {option.icon}
