@@ -7,6 +7,7 @@ export interface Media {
   runtime: string;
   genres: string[];
   year: string;
+  trailer: string;
 }
 
 export interface fetchMediaProps {

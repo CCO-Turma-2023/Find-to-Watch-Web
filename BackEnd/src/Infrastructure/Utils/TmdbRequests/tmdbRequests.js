@@ -42,10 +42,13 @@ class TmdbRequests {
     const promises = filteredResults.map(async (item) => {
       const detailsPromise = this.RequestMediabyId(item.id, mediaType);
       const providersPromise = this.RequestProviders(item.id, mediaType);
+      const trailerPromise = this.RequestTrailer(item.id, mediaType);
 
-      const [data, providers] = await Promise.all([
+      
+      const [data, providers, trailerKey] = await Promise.all([
         detailsPromise,
         providersPromise,
+        trailerPromise, 
       ]);
 
       item.type = mediaType;
@@ -60,6 +63,7 @@ class TmdbRequests {
       )[0];
       item.cast = data.cast;
       item.providers = providers;
+      item.trailer = trailerKey ? trailerKey : null;
 
       return item;
     });
@@ -163,6 +167,39 @@ class TmdbRequests {
         error.message
       );
       return [];
+    }
+  }
+
+  async RequestTrailer(id, mediaType) {
+    try {
+      const findBestVideo = (videos) => {
+        if (!videos || videos.length === 0) {
+          return null;
+        }
+        return (
+          videos.find((v) => v.type === "Trailer") ||
+          videos.find((v) => v.type === "Teaser")
+        );
+      };
+
+      const endpointPT = `3/${mediaType}/${id}/videos?language=pt-BR`;
+      let response = await api.get(endpointPT, options);
+      let bestVideo = findBestVideo(response.data.results);
+
+      if (!bestVideo) {
+        const endpointEN = `3/${mediaType}/${id}/videos?language=en-US`;
+        response = await api.get(endpointEN, options);
+        bestVideo = findBestVideo(response.data.results);
+      }
+
+      return bestVideo ? bestVideo.key : null;
+
+    } catch (error) {
+      console.error(
+        `Falha ao buscar vídeo para ${mediaType} ID ${id}:`,
+        error.message || error
+      );
+      return null;
     }
   }
 }

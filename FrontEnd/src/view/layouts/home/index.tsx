@@ -10,6 +10,7 @@ import type { fetchMediaProps, Media } from "../../../app/interfaces/media";
 import ContentPlatform from "../../components/contentPlatform";
 import PlayIcon from "../../assets/icons/playIcon";
 import MarkerIcon from "../../assets/icons/marker";
+import YouTube from "react-youtube";
 
 const backgroundVariants = {
   enter: { opacity: 0 },
@@ -35,12 +36,12 @@ const contentVariants = {
   }),
 };
 
-
 export default function HomeLayout() {
   const [contentInfo, setContentInfo] = useState<Media[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [indexSelected, setIndexSelected] = useState(0);
   const [direction, setDirection] = useState<"left" | "right">("right");
+  const [showTrailer, setShowTrailer] = useState(false);
 
   const handleNext = useCallback(() => {
     setDirection("right");
@@ -55,6 +56,16 @@ export default function HomeLayout() {
       prev === 0 ? contentInfo.length - 1 : prev - 1
     );
   }, [contentInfo.length]);
+
+  const handleOpenTrailer = () => {
+    if (contentInfo[indexSelected]?.trailer) {
+      setShowTrailer(true);
+    }
+  };
+
+  const handleCloseTrailer = () => {
+    setShowTrailer(false);
+  };
 
   useEffect(() => {
     const fetchRandomMedia = async () => {
@@ -95,14 +106,17 @@ export default function HomeLayout() {
   }, []);
 
   useEffect(() => {
-    if (contentInfo.length === 0 || isLoading) return;
+    if (contentInfo.length === 0 || isLoading || showTrailer) {
+      return; 
+    }
 
     const timer = setInterval(() => {
       handleNext();
     }, 10000);
 
+    
     return () => clearInterval(timer);
-  }, [contentInfo.length, isLoading, indexSelected, handleNext]);
+  }, [contentInfo.length, isLoading, indexSelected, handleNext, showTrailer]);
 
   const backgroundStyle = {
     backgroundImage:
@@ -112,6 +126,8 @@ export default function HomeLayout() {
     backgroundSize: "cover",
     backgroundPosition: "center",
   };
+
+  const videoId = contentInfo[indexSelected]?.trailer;
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black">
@@ -222,6 +238,7 @@ export default function HomeLayout() {
                         className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#03915E] sm:w-[11.3125rem]"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
+                        onClick={handleOpenTrailer}
                       >
                         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white">
                           <PlayIcon />
@@ -266,7 +283,44 @@ export default function HomeLayout() {
         <div className="mt-8 flex w-full items-center justify-center px-6">
           <ContentPlatform />
         </div>
+        
       </div>
+      <AnimatePresence>
+        {showTrailer && videoId && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleCloseTrailer} 
+          >
+            <div
+              className="relative w-full max-w-4xl aspect-video"
+              onClick={(e) => e.stopPropagation()} 
+            >
+              <button
+                onClick={handleCloseTrailer}
+                className="absolute -top-10 right-0 text-white text-3xl z-10"
+                aria-label="Fechar player"
+              >
+                &times;
+              </button>
+              <YouTube
+                videoId={videoId}
+                opts={{
+                  height: "100%",
+                  width: "100%",
+                  playerVars: {
+                    autoplay: 1, 
+                    controls: 1, 
+                  },
+                }}
+                className="h-full w-full"
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

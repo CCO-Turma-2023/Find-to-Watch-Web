@@ -6,6 +6,7 @@ class Media {
     backdrop_path,
     genres,
     title,
+    trailer,
     overview,
     type,
     runtime,
@@ -22,6 +23,7 @@ class Media {
     this.type = type;
     this.genres = genres;
     this.providers = providers;
+    this.trailer = trailer;
     this.runtime = runtime
       ? `${Math.floor(runtime / 60)}h ${runtime % 60}m`
       : "N/A";
