@@ -11,6 +11,7 @@ import ContentPlatform from "../../components/contentPlatform";
 import PlayIcon from "../../assets/icons/playIcon";
 import MarkerIcon from "../../assets/icons/marker";
 import YouTube from "react-youtube";
+import ContentCarousel from "../../components/contentCarousel";
 
 const backgroundVariants = {
   enter: { opacity: 0 },
@@ -46,14 +47,14 @@ export default function HomeLayout() {
   const handleNext = useCallback(() => {
     setDirection("right");
     setIndexSelected((prev) =>
-      prev === contentInfo.length - 1 ? 0 : prev + 1
+      prev === contentInfo.length - 1 ? 0 : prev + 1,
     );
   }, [contentInfo.length]);
 
   const handlePrev = useCallback(() => {
     setDirection("left");
     setIndexSelected((prev) =>
-      prev === 0 ? contentInfo.length - 1 : prev - 1
+      prev === 0 ? contentInfo.length - 1 : prev - 1,
     );
   }, [contentInfo.length]);
 
@@ -107,14 +108,13 @@ export default function HomeLayout() {
 
   useEffect(() => {
     if (contentInfo.length === 0 || isLoading || showTrailer) {
-      return; 
+      return;
     }
 
     const timer = setInterval(() => {
       handleNext();
     }, 10000);
 
-    
     return () => clearInterval(timer);
   }, [contentInfo.length, isLoading, indexSelected, handleNext, showTrailer]);
 
@@ -130,8 +130,8 @@ export default function HomeLayout() {
   const videoId = contentInfo[indexSelected]?.trailer;
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-black">
-      <div className="absolute top-0 left-0 right-0 z-30">
+    <div className="relative min-h-screen w-full overflow-auto bg-black p-4">
+      <div className="absolute top-0 right-0 left-0 z-30">
         <HeaderPage />
       </div>
 
@@ -152,12 +152,10 @@ export default function HomeLayout() {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
       </div>
 
-      
       <div className="relative z-20 flex min-h-screen flex-col justify-end pb-8 md:justify-center">
-        
         <div className="flex w-full items-center justify-between px-6">
           <motion.button
-            className={`flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12 `}
+            className={`flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePrev}
@@ -165,9 +163,7 @@ export default function HomeLayout() {
             <LeftArrow />
           </motion.button>
 
-         
           <div className="flex w-full flex-grow flex-col items-start justify-center overflow-hidden px-4 sm:px-6 md:px-12">
-            
             <div className="relative flex min-h-[380px] w-full max-w-xs flex-col justify-end sm:max-w-md md:max-w-xl lg:max-w-2xl">
               <AnimatePresence mode="wait" custom={direction}>
                 {!isLoading &&
@@ -186,7 +182,6 @@ export default function HomeLayout() {
                     }}
                     className="w-full"
                   >
-                    
                     <ContentType
                       type={
                         contentInfo[indexSelected].type === "movie"
@@ -203,8 +198,7 @@ export default function HomeLayout() {
                           info={contentInfo[indexSelected].year}
                           bool={
                             !!contentInfo[indexSelected].runtime ||
-                            (contentInfo[indexSelected].genres?.length ??
-                              0) > 0
+                            (contentInfo[indexSelected].genres?.length ?? 0) > 0
                           }
                         />
                       )}
@@ -212,8 +206,7 @@ export default function HomeLayout() {
                         <ContentInfos
                           info={contentInfo[indexSelected].runtime}
                           bool={
-                            (contentInfo[indexSelected].genres?.length ??
-                              0) > 0
+                            (contentInfo[indexSelected].genres?.length ?? 0) > 0
                           }
                         />
                       )}
@@ -230,7 +223,7 @@ export default function HomeLayout() {
                         ),
                       )}
                     </div>
-                    <p className="mt-4 text-gray-200 line-clamp-3 sm:line-clamp-4 md:line-clamp-5">
+                    <p className="mt-4 line-clamp-3 text-gray-200 sm:line-clamp-4 md:line-clamp-5">
                       {contentInfo[indexSelected].overview}
                     </p>
                     <div className="select-non mt-4 flex flex-col items-start justify-start gap-4 sm:flex-row">
@@ -271,7 +264,7 @@ export default function HomeLayout() {
           </div>
 
           <motion.button
-            className={`flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12 `}
+            className={`flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleNext}
@@ -283,7 +276,6 @@ export default function HomeLayout() {
         <div className="mt-8 flex w-full items-center justify-center px-6">
           <ContentPlatform />
         </div>
-        
       </div>
       <AnimatePresence>
         {showTrailer && videoId && (
@@ -292,15 +284,15 @@ export default function HomeLayout() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleCloseTrailer} 
+            onClick={handleCloseTrailer}
           >
             <div
-              className="relative w-full max-w-4xl aspect-video"
-              onClick={(e) => e.stopPropagation()} 
+              className="relative aspect-video w-full max-w-4xl"
+              onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={handleCloseTrailer}
-                className="absolute -top-10 right-0 text-white text-3xl z-10"
+                className="absolute -top-10 right-0 z-10 text-3xl text-white"
                 aria-label="Fechar player"
               >
                 &times;
@@ -311,8 +303,8 @@ export default function HomeLayout() {
                   height: "100%",
                   width: "100%",
                   playerVars: {
-                    autoplay: 1, 
-                    controls: 1, 
+                    autoplay: 1,
+                    controls: 1,
                   },
                 }}
                 className="h-full w-full"
@@ -321,6 +313,8 @@ export default function HomeLayout() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ContentCarousel />
     </div>
   );
 }
