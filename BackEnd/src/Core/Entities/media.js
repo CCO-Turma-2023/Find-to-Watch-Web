@@ -4,6 +4,7 @@ class Media {
   constructor({
     id,
     backdrop_path,
+    poster_path,
     genres,
     title,
     trailer,
@@ -18,6 +19,9 @@ class Media {
     this.backdrop_path = backdrop_path
       ? `${imageBaseUrl}${backdrop_path}`
       : null;
+
+    this.poster_path = poster_path ? `${imageBaseUrl}${poster_path}` : null;
+
     this.title = title;
     this.overview = overview;
     this.type = type;

@@ -6,6 +6,8 @@ export async function getMedias(
 ): Promise<Media[] | undefined> {
   try {
     const response = await api.post("/tmdb/category", data);
+    console.log(response.data);
+
     return response.data;
   } catch (error) {
     console.error(error);

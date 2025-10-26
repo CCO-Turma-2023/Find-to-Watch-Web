@@ -44,11 +44,10 @@ class TmdbRequests {
       const providersPromise = this.RequestProviders(item.id, mediaType);
       const trailerPromise = this.RequestTrailer(item.id, mediaType);
 
-      
       const [data, providers, trailerKey] = await Promise.all([
         detailsPromise,
         providersPromise,
-        trailerPromise, 
+        trailerPromise,
       ]);
 
       item.type = mediaType;
@@ -193,7 +192,6 @@ class TmdbRequests {
       }
 
       return bestVideo ? bestVideo.key : null;
-
     } catch (error) {
       console.error(
         `Falha ao buscar vídeo para ${mediaType} ID ${id}:`,

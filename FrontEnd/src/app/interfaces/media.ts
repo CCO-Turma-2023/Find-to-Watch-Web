@@ -8,6 +8,7 @@ export interface Media {
   genres: string[];
   year: string;
   trailer: string;
+  poster_path: string;
 }
 
 export interface fetchMediaProps {
