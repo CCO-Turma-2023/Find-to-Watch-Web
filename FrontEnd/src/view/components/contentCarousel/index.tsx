@@ -1,11 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import LeftArrow from "../../assets/icons/leftArrow"; // Ajuste o caminho se necessário
-import RightArrow from "../../assets/icons/rightArrow"; // Ajuste o caminho se necessário
-import { getMedias } from "../../../app/services/gets/getMedias"; // Ajuste o caminho se necessário
-import type { fetchMediaProps, Media } from "../../../app/interfaces/media"; // Ajuste o caminho se necessário
-import MediaContent from "../mediaContent"; // Ajuste o caminho se necessário
+import LeftArrow from "../../assets/icons/leftArrow";
+import RightArrow from "../../assets/icons/rightArrow";
+import { getMedias } from "../../../app/services/gets/getMedias";
+import type {
+  fetchMediaProps,
+  genreData,
+  Media,
+} from "../../../app/interfaces/media";
+import MediaContent from "../mediaContent";
 import { useInView } from "react-intersection-observer";
+import { useMedia } from "../../../app/contexts/contexts";
 
 // --- Gêneros ---
 const contents = [
@@ -165,15 +170,6 @@ const contents = [
   },
 ];
 
-interface genreData {
-  titulo: string;
-  index: number;
-  content: Media[];
-  page: number;
-  genreId: number;
-  mediaType: string;
-}
-
 interface GenreCarouselProps {
   genre: genreData;
   visibleCount: number;
@@ -206,7 +202,7 @@ function GenreCarousel({
       const fetchData: fetchMediaProps = {
         page: nextPage,
         genreId: genre.genreId,
-        mediaType: genre.mediaType, 
+        mediaType: genre.mediaType,
       };
       const newData = await getMedias(fetchData);
       if (newData && newData.length > 0) {
@@ -254,7 +250,11 @@ function GenreCarousel({
                 transition={{ type: "spring", stiffness: 100, damping: 25 }}
               >
                 {genre.content.map((media) => (
-                  <MediaContent key={media.id} urlImage={media.poster_path} />
+                  <MediaContent
+                    key={media.id}
+                    id={media.id}
+                    urlImage={media.poster_path}
+                  />
                 ))}
               </motion.div>
             </div>
@@ -280,7 +280,7 @@ function GenreCarousel({
 }
 
 export default function ContentCarousel() {
-  const [genres, setGenres] = useState<genreData[]>([]);
+  const { genres, setGenres } = useMedia();
 
   // Estado para rastrear quantos gêneros já foram buscados
   const [fetchedCount, setFetchedCount] = useState(0);
@@ -288,7 +288,7 @@ export default function ContentCarousel() {
   // Estado para prevenir buscas múltiplas ao mesmo tempo
   const [loading, setLoading] = useState(false);
 
-  // Estados de responsividade 
+  // Estados de responsividade
   const [visibleCount, setVisibleCount] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [isSmallScreen, setIsSmallScreen] = useState(true);
@@ -308,7 +308,7 @@ export default function ContentCarousel() {
         const fetchData: fetchMediaProps = {
           page: genre.page,
           genreId: genre.id,
-          mediaType: genre.mediaType, 
+          mediaType: genre.mediaType,
         };
         const mediaData = await getMedias(fetchData);
 
@@ -349,9 +349,9 @@ export default function ContentCarousel() {
     }
 
     fetchInitialData();
-  }, [fetchedCount]); 
+  }, [fetchedCount]);
 
-  // Responsividade 
+  // Responsividade
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -385,9 +385,7 @@ export default function ContentCarousel() {
     return () => observer.disconnect();
   }, []);
 
-
   useEffect(() => {
-
     if (inView && !loading && fetchedCount < contents.length) {
       async function fetchMoreGenres() {
         setLoading(true);
@@ -401,7 +399,7 @@ export default function ContentCarousel() {
           const newData = await fetchGenres(genresToFetch);
 
           // Adiciona os novos gêneros aos já existentes no estado
-          setGenres((prevGenres) => [...prevGenres, ...newData]);
+          setGenres([...genres, ...newData]);
 
           // Atualiza a contagem de quantos já buscamos
           setFetchedCount(newCount);
@@ -412,7 +410,7 @@ export default function ContentCarousel() {
 
       fetchMoreGenres();
     }
-  }, [inView, loading, fetchedCount]); 
+  }, [inView, loading, fetchedCount]);
 
   const stepWidthPx = (isSmallScreen ? 214 : 224) + (isSmallScreen ? 10 : 16);
 
@@ -421,8 +419,8 @@ export default function ContentCarousel() {
     newContent: Media[],
     nextPage: number,
   ) => {
-    setGenres((prev) =>
-      prev.map((g) =>
+    setGenres(
+      genres.map((g) =>
         g.genreId === genreId
           ? { ...g, content: newContent, page: nextPage }
           : g,

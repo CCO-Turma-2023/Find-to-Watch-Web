@@ -16,3 +16,12 @@ export interface fetchMediaProps {
   genreId: number;
   mediaType: string;
 }
+
+export interface genreData {
+  titulo: string;
+  index: number;
+  content: Media[];
+  page: number;
+  genreId: number;
+  mediaType: string;
+}
