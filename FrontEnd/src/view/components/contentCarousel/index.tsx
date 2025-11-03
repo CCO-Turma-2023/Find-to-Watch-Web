@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import LeftArrow from "../../assets/icons/leftArrow";
-import RightArrow from "../../assets/icons/rightArrow";
-import { getMedias } from "../../../app/services/gets/getMedias";
-import type { fetchMediaProps, Media } from "../../../app/interfaces/media";
-import MediaContent from "../mediaContent";
+import LeftArrow from "../../assets/icons/leftArrow"; // Ajuste o caminho se necessário
+import RightArrow from "../../assets/icons/rightArrow"; // Ajuste o caminho se necessário
+import { getMedias } from "../../../app/services/gets/getMedias"; // Ajuste o caminho se necessário
+import type { fetchMediaProps, Media } from "../../../app/interfaces/media"; // Ajuste o caminho se necessário
+import MediaContent from "../mediaContent"; // Ajuste o caminho se necessário
 import { useInView } from "react-intersection-observer";
 
 // --- Gêneros ---
@@ -174,7 +174,6 @@ interface genreData {
   mediaType: string;
 }
 
-// --- Componente filho para cada gênero ---
 interface GenreCarouselProps {
   genre: genreData;
   visibleCount: number;
@@ -207,7 +206,7 @@ function GenreCarousel({
       const fetchData: fetchMediaProps = {
         page: nextPage,
         genreId: genre.genreId,
-        mediaType: "movie",
+        mediaType: genre.mediaType, 
       };
       const newData = await getMedias(fetchData);
       if (newData && newData.length > 0) {
@@ -280,10 +279,16 @@ function GenreCarousel({
   );
 }
 
-// --- Componente principal ---
 export default function ContentCarousel() {
   const [genres, setGenres] = useState<genreData[]>([]);
-  const [loadedCount, setLoadedCount] = useState(2); // quantidade inicial a renderizar
+
+  // Estado para rastrear quantos gêneros já foram buscados
+  const [fetchedCount, setFetchedCount] = useState(0);
+
+  // Estado para prevenir buscas múltiplas ao mesmo tempo
+  const [loading, setLoading] = useState(false);
+
+  // Estados de responsividade 
   const [visibleCount, setVisibleCount] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [isSmallScreen, setIsSmallScreen] = useState(true);
@@ -294,42 +299,59 @@ export default function ContentCarousel() {
     threshold: 0.1,
   });
 
-  // Fetch inicial
-  useEffect(() => {
-    async function fetchInitial() {
-      const initial: genreData[] = [];
+  // Função para buscar uma seção de gêneros.
+  async function fetchGenres(
+    genresToFetch: typeof contents,
+  ): Promise<genreData[]> {
+    const promises = genresToFetch.map(async (genre) => {
+      try {
+        const fetchData: fetchMediaProps = {
+          page: genre.page,
+          genreId: genre.id,
+          mediaType: genre.mediaType, 
+        };
+        const mediaData = await getMedias(fetchData);
 
-      for (const genre of contents) {
-        try {
-          const fetchData: fetchMediaProps = {
+        if (mediaData && mediaData.length > 0) {
+          return {
+            titulo: genre.titulo,
+            index: genre.index,
+            content: mediaData,
             page: genre.page,
             genreId: genre.id,
             mediaType: genre.mediaType,
           };
-          const mediaData = await getMedias(fetchData);
-
-          if (mediaData && mediaData.length > 0) {
-            initial.push({
-              titulo: genre.titulo,
-              index: genre.index,
-              content: mediaData,
-              page: genre.page,
-              genreId: genre.id,
-              mediaType: genre.mediaType,
-            });
-          }
-        } catch (err) {
-          console.warn(`Erro ao buscar ${genre.titulo}:`, err);
         }
+      } catch (err) {
+        console.warn(`Erro ao buscar ${genre.titulo}:`, err);
       }
+      return null; // Retorna nulo em caso de erro ou sem dados
+    });
 
-      setGenres(initial);
+    const results = await Promise.all(promises);
+
+    return results.filter((data): data is genreData => data !== null);
+  }
+
+  // Busca apenas os 3 primeiros gêneros
+  useEffect(() => {
+    // Garante que a busca inicial só ocorra uma vez
+    if (fetchedCount > 0) return;
+
+    async function fetchInitialData() {
+      setLoading(true);
+      const initialGenresToFetch = contents.slice(0, 3); // Pega só os 3 primeiros
+      const initialData = await fetchGenres(initialGenresToFetch);
+
+      setGenres(initialData);
+      setFetchedCount(3); // Define que já buscamos 3
+      setLoading(false);
     }
 
-    fetchInitial();
-  }, []);
+    fetchInitialData();
+  }, [fetchedCount]); 
 
-  // Responsividade
+  // Responsividade 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -363,12 +385,34 @@ export default function ContentCarousel() {
     return () => observer.disconnect();
   }, []);
 
-  // Quando o inView do "load more" for verdadeiro, carregar mais 2
+
   useEffect(() => {
-    if (inView) {
-      setLoadedCount((prev) => Math.min(prev + 2, genres.length));
+
+    if (inView && !loading && fetchedCount < contents.length) {
+      async function fetchMoreGenres() {
+        setLoading(true);
+
+        const nextIndex = fetchedCount;
+        const newCount = Math.min(nextIndex + 2, contents.length);
+
+        const genresToFetch = contents.slice(nextIndex, newCount);
+
+        if (genresToFetch.length > 0) {
+          const newData = await fetchGenres(genresToFetch);
+
+          // Adiciona os novos gêneros aos já existentes no estado
+          setGenres((prevGenres) => [...prevGenres, ...newData]);
+
+          // Atualiza a contagem de quantos já buscamos
+          setFetchedCount(newCount);
+        }
+
+        setLoading(false);
+      }
+
+      fetchMoreGenres();
     }
-  }, [inView, genres.length]);
+  }, [inView, loading, fetchedCount]); 
 
   const stepWidthPx = (isSmallScreen ? 214 : 224) + (isSmallScreen ? 10 : 16);
 
@@ -391,7 +435,7 @@ export default function ContentCarousel() {
       ref={containerRef}
       className="flex w-full flex-col justify-center gap-12"
     >
-      {genres.slice(0, loadedCount).map((genre) => (
+      {genres.map((genre) => (
         <GenreCarousel
           key={genre.index}
           genre={genre}
@@ -401,8 +445,10 @@ export default function ContentCarousel() {
           updateGenreContent={updateGenreContent}
         />
       ))}
-      {/* Este div é só para detectar quando chegou no final do que está renderizado */}
-      {loadedCount < genres.length && <div ref={loadMoreRef} className="h-1" />}
+
+      {!loading && fetchedCount < contents.length && (
+        <div ref={loadMoreRef} className="h-1" />
+      )}
     </div>
   );
 }
