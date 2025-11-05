@@ -314,7 +314,7 @@ export default function HomeLayout() {
         )}
       </AnimatePresence>
 
-      <ContentCarousel />
+      <ContentCarousel type={0} />
     </div>
   );
 }

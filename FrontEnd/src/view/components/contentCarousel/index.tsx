@@ -279,27 +279,27 @@ function GenreCarousel({
   );
 }
 
-export default function ContentCarousel() {
+export default function ContentCarousel({ type }: { type: number }) {
   const { genres, setGenres } = useMedia();
 
-  // Estado para rastrear quantos gêneros já foram buscados
   const [fetchedCount, setFetchedCount] = useState(0);
-
-  // Estado para prevenir buscas múltiplas ao mesmo tempo
   const [loading, setLoading] = useState(false);
 
-  // Estados de responsividade
   const [visibleCount, setVisibleCount] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [isSmallScreen, setIsSmallScreen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // InView para lazy load dos gêneros
-  const { ref: loadMoreRef, inView } = useInView({
-    threshold: 0.1,
+  const { ref: loadMoreRef, inView } = useInView({ threshold: 0.1 });
+
+  // 🔥 Filtra os conteúdos conforme o "type"
+  const filteredContents = contents.filter((item) => {
+    if (type === 0) return true; // Todos
+    if (type === 1) return item.mediaType === "movie";
+    if (type === 2) return item.mediaType === "tv";
+    return false;
   });
 
-  // Função para buscar uma seção de gêneros.
   async function fetchGenres(
     genresToFetch: typeof contents,
   ): Promise<genreData[]> {
@@ -325,31 +325,29 @@ export default function ContentCarousel() {
       } catch (err) {
         console.warn(`Erro ao buscar ${genre.titulo}:`, err);
       }
-      return null; // Retorna nulo em caso de erro ou sem dados
+      return null;
     });
 
     const results = await Promise.all(promises);
-
     return results.filter((data): data is genreData => data !== null);
   }
 
-  // Busca apenas os 3 primeiros gêneros
+  // 🔹 Busca inicial
   useEffect(() => {
-    // Garante que a busca inicial só ocorra uma vez
     if (fetchedCount > 0) return;
 
     async function fetchInitialData() {
       setLoading(true);
-      const initialGenresToFetch = contents.slice(0, 3); // Pega só os 3 primeiros
+      const initialGenresToFetch = filteredContents.slice(0, 3);
       const initialData = await fetchGenres(initialGenresToFetch);
 
       setGenres(initialData);
-      setFetchedCount(3); // Define que já buscamos 3
+      setFetchedCount(3);
       setLoading(false);
     }
 
     fetchInitialData();
-  }, [fetchedCount]);
+  }, [fetchedCount, type]); // 👈 reexecuta se mudar o "type"
 
   // Responsividade
   useEffect(() => {
@@ -385,23 +383,20 @@ export default function ContentCarousel() {
     return () => observer.disconnect();
   }, []);
 
+  // 🔹 Lazy load (carregar mais gêneros)
   useEffect(() => {
-    if (inView && !loading && fetchedCount < contents.length) {
+    if (inView && !loading && fetchedCount < filteredContents.length) {
       async function fetchMoreGenres() {
         setLoading(true);
 
         const nextIndex = fetchedCount;
-        const newCount = Math.min(nextIndex + 2, contents.length);
+        const newCount = Math.min(nextIndex + 2, filteredContents.length);
 
-        const genresToFetch = contents.slice(nextIndex, newCount);
+        const genresToFetch = filteredContents.slice(nextIndex, newCount);
 
         if (genresToFetch.length > 0) {
           const newData = await fetchGenres(genresToFetch);
-
-          // Adiciona os novos gêneros aos já existentes no estado
           setGenres([...genres, ...newData]);
-
-          // Atualiza a contagem de quantos já buscamos
           setFetchedCount(newCount);
         }
 
@@ -410,7 +405,7 @@ export default function ContentCarousel() {
 
       fetchMoreGenres();
     }
-  }, [inView, loading, fetchedCount]);
+  }, [inView, loading, fetchedCount, type]); // 👈 depende também de "type"
 
   const stepWidthPx = (isSmallScreen ? 214 : 224) + (isSmallScreen ? 10 : 16);
 
@@ -431,21 +426,33 @@ export default function ContentCarousel() {
   return (
     <div
       ref={containerRef}
-      className="flex w-full flex-col justify-center gap-12"
+      className="relative flex min-h-[200px] w-full flex-col justify-center gap-12"
     >
-      {genres.map((genre) => (
-        <GenreCarousel
-          key={genre.index}
-          genre={genre}
-          visibleCount={visibleCount}
-          viewportWidth={viewportWidth}
-          stepWidthPx={stepWidthPx}
-          updateGenreContent={updateGenreContent}
-        />
-      ))}
+      {/* Mostrar carregando centralizado se ainda não houver gêneros */}
+      {loading && genres.length === 0 ? (
+        <div className="absolute inset-0 top-1/2 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 text-white">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
+            <span className="text-lg font-semibold">Carregando...</span>
+          </div>
+        </div>
+      ) : (
+        <>
+          {genres.map((genre) => (
+            <GenreCarousel
+              key={genre.index}
+              genre={genre}
+              visibleCount={visibleCount}
+              viewportWidth={viewportWidth}
+              stepWidthPx={stepWidthPx}
+              updateGenreContent={updateGenreContent}
+            />
+          ))}
 
-      {!loading && fetchedCount < contents.length && (
-        <div ref={loadMoreRef} className="h-1" />
+          {!loading && fetchedCount < filteredContents.length && (
+            <div ref={loadMoreRef} className="h-1" />
+          )}
+        </>
       )}
     </div>
   );

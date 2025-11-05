@@ -1,3 +1,8 @@
+export interface castProp {
+  name: string;
+  profile_path: string;
+}
+
 export interface Media {
   id: number;
   backdrop_path: string;
@@ -9,6 +14,8 @@ export interface Media {
   year: string;
   trailer: string;
   poster_path: string;
+  providers?: string[];
+  cast: castProp[];
 }
 
 export interface fetchMediaProps {
