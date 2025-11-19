@@ -9,6 +9,8 @@ import {
 import Buttons from "../buttons";
 import PerfilOptions from "../perfilOptions";
 import logo from "../../assets/logo.png";
+import { motion } from "framer-motion";
+import SearchIcon from "../../assets/icons/searcIcon";
 
 const HamburgerIcon = () => (
   <svg
@@ -48,24 +50,30 @@ export default function HeaderPage() {
 
   return (
     <header
-      
       className="relative flex w-full items-center px-4 py-3 text-white md:px-8"
       style={{
         background:
           "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(2, 2, 2, 0.5) 50%, rgba(2, 2, 2, 0.10) 100%)",
       }}
     >
-      
       <div className="hidden w-full items-center md:flex md:flex-1 md:gap-4">
-        
         <div className="flex flex-1 justify-start">
           <img className="h-14 w-auto flex-shrink-0" src={logo} alt="Logo" />
         </div>
 
-        
         <nav className="flex items-center gap-4 lg:gap-6">{navLinks}</nav>
 
-        <div className="flex flex-1 justify-end">
+        <div className="flex flex-1 justify-end gap-3">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              window.location.replace("search");
+            }}
+          >
+            <SearchIcon />
+          </motion.button>
+
           {isTokenValid() ? (
             <PerfilOptions info={infoToken} />
           ) : (
@@ -93,7 +101,7 @@ export default function HeaderPage() {
       </div>
 
       {isMenuOpen && (
-        <div className="absolute left-0 top-full z-50 flex w-full flex-col items-center gap-4 bg-black/95 p-4 md:hidden">
+        <div className="relative top-full left-0 z-50 flex w-full flex-col items-center gap-4 bg-black/95 p-4 md:hidden">
           {navLinks}
           {isTokenValid() ? (
             <div className="mt-4 w-full">

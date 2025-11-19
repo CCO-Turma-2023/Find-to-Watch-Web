@@ -130,7 +130,7 @@ export default function HomeLayout() {
   const videoId = contentInfo[indexSelected]?.trailer;
 
   return (
-    <div className="relative min-h-screen w-full overflow-auto bg-black p-4">
+    <div className="relative min-h-screen w-full overflow-auto bg-[#1f1f1f] p-4">
       <div className="absolute top-0 right-0 left-0 z-30">
         <HeaderPage />
       </div>
@@ -148,8 +148,8 @@ export default function HomeLayout() {
             transition={{ opacity: { duration: 0.8, ease: "easeInOut" } }}
           />
         </AnimatePresence>
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-[#1f1f1f]/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1f1f1f] via-[#1f1f1f]/30 to-transparent" />
       </div>
 
       <div className="relative z-20 flex min-h-screen flex-col justify-end pb-8 md:justify-center">
