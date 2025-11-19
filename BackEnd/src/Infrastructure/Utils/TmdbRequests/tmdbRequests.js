@@ -39,7 +39,23 @@ class TmdbRequests {
       (item) => item.overview?.trim() !== "" && item.backdrop_path
     );
 
+    return this.enrichResults(filteredResults, mediaType);
+  }
+
+  async searchMedia(query) {
+    const url = `3/search/multi?query=${query}&include_adult=false&language=pt-BR&page=1`;
+    const res = await api.get(url, options);
+
+    const filteredResults = res.data.results.filter(
+      (item) =>
+        (item.media_type === "movie" || item.media_type === "tv") &&
+        item.overview?.trim() !== "" &&
+        item.backdrop_path
+    );
+
+    // Enrich results needs to handle mixed media types
     const promises = filteredResults.map(async (item) => {
+      const mediaType = item.media_type;
       const detailsPromise = this.RequestMediabyId(item.id, mediaType);
       const providersPromise = this.RequestProviders(item.id, mediaType);
       const trailerPromise = this.RequestTrailer(item.id, mediaType);
@@ -51,6 +67,42 @@ class TmdbRequests {
       ]);
 
       item.type = mediaType;
+      const isMovie = mediaType === "movie";
+      if (!isMovie) {
+        item.title = item.name;
+      }
+
+      item.genres = data.genres.map((genre) => genre.name);
+      item.runtime = isMovie ? data.runtime : data.episode_run_time?.[0] || 0;
+      item.year = (isMovie ? data.release_date : data.first_air_date)?.split(
+        "-"
+      )[0];
+      item.cast = data.cast;
+      item.providers = providers;
+      item.trailer = trailerKey ? trailerKey : null;
+
+      return item;
+    });
+
+    const detailedItems = await Promise.all(promises);
+    const mediaInstances = detailedItems.map((item) => new Media(item));
+    return mediaInstances;
+  }
+
+  async enrichResults(results, mediaType) {
+    const promises = results.map(async (item) => {
+      const detailsPromise = this.RequestMediabyId(item.id, mediaType);
+      const providersPromise = this.RequestProviders(item.id, mediaType);
+      const trailerPromise = this.RequestTrailer(item.id, mediaType);
+
+      const [data, providers, trailerKey] = await Promise.all([
+        detailsPromise,
+        providersPromise,
+        trailerPromise,
+      ]);
+
+      item.type = mediaType;
+      const isMovie = mediaType === "movie";
       if (!isMovie) {
         item.title = item.name;
       }

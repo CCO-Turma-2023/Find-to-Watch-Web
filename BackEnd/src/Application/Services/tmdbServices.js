@@ -11,6 +11,11 @@ class TmdbServices {
     );
     return content;
   }
+
+  async searchMedia(query) {
+    const content = await this.tmdbRequests.searchMedia(query);
+    return content;
+  }
 }
 
 module.exports = TmdbServices;

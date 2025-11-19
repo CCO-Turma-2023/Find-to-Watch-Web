@@ -96,6 +96,31 @@ const router = Router();
  *         description: Erro interno no servidor
  */
 
+/**
+ * @swagger
+ * /tmdb/search:
+ *   get:
+ *     summary: Busca mídias por nome
+ *     tags: [TMDB]
+ *     description: |
+ *       Retorna uma lista de filmes ou séries com base no termo de pesquisa.
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: O termo de pesquisa.
+ *     responses:
+ *       200:
+ *         description: Lista de mídias retornada com sucesso
+ *       400:
+ *         description: Parâmetro 'query' ausente
+ *       500:
+ *         description: Erro interno no servidor
+ */
+router.get("/search", tmdbController.searchMedia);
+
 router.post("/category", tmdbController.fetchCategory);
 
 module.exports = router;

@@ -76,6 +76,7 @@ export default function HeaderSearch({
             whileTap={{ scale: 0.95 }}
             whileHover={{ scale: 1.05 }}
             className="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer"
+            onClick={() => onSearch(value)}
           >
             <SearchIcon />
           </motion.button>
