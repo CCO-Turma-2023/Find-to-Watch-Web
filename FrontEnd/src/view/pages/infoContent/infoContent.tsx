@@ -7,7 +7,8 @@ import { motion } from "framer-motion";
 import ContentInfos from "../../components/contentInfos";
 import PlayIcon from "../../assets/icons/playIcon";
 import MarkerIcon from "../../assets/icons/marker";
-import YouTube from "react-youtube";
+import TrailerModal from "../../components/trailerModal";
+import ActionButton from "../../components/actionButton";
 import LeftArrow from "../../assets/icons/leftArrow";
 import apple from "../../assets/platforms/apple.png";
 import claro from "../../assets/platforms/claro.png";
@@ -21,6 +22,7 @@ import claroplus from "../../assets/platforms/clarotvplus.png";
 import max from "../../assets/platforms/max.png";
 import RightArrow from "../../assets/icons/rightArrow";
 import perfilDefault from "../../assets/defaultPerfil.jpg";
+import ListModal from "../../components/listModal";
 
 const platformLogos = [
   {
@@ -93,6 +95,7 @@ export default function InfoContent() {
   const [videoId, setVideoId] = useState<string | null>(null);
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const handleOpenTrailer = () => {
     if (contentInfo?.trailer) setShowTrailer(true);
@@ -143,6 +146,14 @@ export default function InfoContent() {
 
   return (
     <div className="flex min-h-screen w-full flex-col gap-1 bg-black">
+      {showModal && (
+        <ListModal
+          filmName={contentInfo?.title || ""}
+          filmId={contentInfo?.id || 0}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+
       <div className="absolute h-full w-full">
         <img
           className="h-full w-full object-cover"
@@ -209,30 +220,20 @@ export default function InfoContent() {
           </p>
 
           <div className="mt-4 flex flex-col items-start justify-start gap-4 select-none sm:flex-row">
-            <motion.button
-              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#03915E] sm:w-[11.3125rem]"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <ActionButton
+              icon={<PlayIcon />}
+              label="Ver Trailer"
               onClick={handleOpenTrailer}
-            >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white">
-                <PlayIcon />
-              </div>
-              <span className="text-lg font-bold text-white sm:text-xl">
-                Ver Trailer
-              </span>
-            </motion.button>
-
-            <motion.button
-              className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-white sm:w-[11.3125rem]"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <MarkerIcon />
-              <span className="text-lg font-bold text-white sm:text-xl">
-                Lista
-              </span>
-            </motion.button>
+              variant="primary"
+            />
+            <ActionButton
+              icon={<MarkerIcon />}
+              label="Lista"
+              onClick={() => {
+                setShowModal(true);
+              }}
+              variant="secondary"
+            />
           </div>
         </motion.div>
 
@@ -310,35 +311,7 @@ export default function InfoContent() {
       </div>
 
       {showTrailer && videoId && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={handleCloseTrailer}
-        >
-          <div
-            className="relative aspect-video w-full max-w-4xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={handleCloseTrailer}
-              className="absolute -top-10 right-0 z-10 text-3xl text-white"
-              aria-label="Fechar player"
-            >
-              &times;
-            </button>
-            <YouTube
-              videoId={videoId}
-              opts={{
-                height: "100%",
-                width: "100%",
-                playerVars: { autoplay: 1, controls: 1 },
-              }}
-              className="h-full w-full"
-            />
-          </div>
-        </motion.div>
+        <TrailerModal videoId={videoId} onClose={handleCloseTrailer} />
       )}
     </div>
   );
