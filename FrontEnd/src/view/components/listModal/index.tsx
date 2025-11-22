@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { getMyLists } from "../../../app/services/gets/getmyLists";
+import { createList } from "../../../app/services/posts/createList";
 
 interface ListOption {
   id: number;
@@ -24,6 +26,16 @@ export default function ListModal({
   ]);
   const [isCreating, setIsCreating] = useState(false);
   const [newListName, setNewListName] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
+
+  useEffect(() => {
+    const funGetLists = async () => {
+      const response = await getMyLists();
+      setOptions(response);
+      console.log("teste", response);
+    };
+    funGetLists();
+  }, []);
 
   const toggleList = (id: number) => {
     setOptions((prev) =>
@@ -33,8 +45,9 @@ export default function ListModal({
     );
   };
 
-  const handleCreateList = () => {
+  const handleCreateList = async () => {
     if (!newListName.trim()) return;
+    await createList({ name: newListName, isPublic });
     const newList = { id: Date.now(), name: newListName, hasMedia: true };
     setOptions([...options, newList]);
     setNewListName("");
@@ -76,44 +89,46 @@ export default function ListModal({
         </div>
 
         {/* Body */}
-        <div className="custom-scrollbar max-h-[60vh] overflow-y-auto p-4">
-          <div className="flex flex-col gap-1">
-            {options.map((option) => (
-              <label
-                key={option.id}
-                className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-gray-800"
-              >
-                <div
-                  className={`flex h-5 w-5 items-center justify-center rounded border ${option.hasMedia ? "border-blue-600 bg-blue-600" : "border-gray-500"}`}
+        {options.length > 0 && (
+          <div className="custom-scrollbar max-h-[60vh] overflow-y-auto p-4">
+            <div className="flex flex-col gap-1">
+              {options.map((option) => (
+                <label
+                  key={option.id}
+                  className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-gray-800"
                 >
-                  {option.hasMedia && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-white"
-                    >
-                      <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                  )}
-                </div>
-                <input
-                  type="checkbox"
-                  className="hidden"
-                  checked={!!option.hasMedia}
-                  onChange={() => toggleList(option.id)}
-                />
-                <span className="text-gray-200">{option.name}</span>
-              </label>
-            ))}
+                  <div
+                    className={`flex h-5 w-5 items-center justify-center rounded border ${option.hasMedia ? "border-blue-600 bg-blue-600" : "border-gray-500"}`}
+                  >
+                    {option.hasMedia && (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-white"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    )}
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={!!option.hasMedia}
+                    onChange={() => toggleList(option.id)}
+                  />
+                  <span className="text-gray-200">{option.name}</span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Footer */}
         <div className="border-t border-gray-800 p-4">
@@ -152,8 +167,20 @@ export default function ListModal({
                 onChange={(e) => setNewListName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateList()}
               />
+              <label className="text-xs font-medium text-gray-400 uppercase">
+                Privacidade
+              </label>
+              <select
+                value={String(isPublic)}
+                onChange={(e) => setIsPublic(e.target.value === "true")}
+                className="w-full rounded-lg border border-gray-700 bg-gray-900 p-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="true">Pública</option>
+                <option value="false">Privada</option>
+              </select>
               <div className="mt-1 flex justify-end gap-2">
                 <button
+                  type="button"
                   onClick={() => setIsCreating(false)}
                   className="rounded-lg px-4 py-2 text-sm font-medium text-gray-400 transition hover:text-white"
                 >
@@ -161,7 +188,7 @@ export default function ListModal({
                 </button>
                 <button
                   onClick={handleCreateList}
-                  disabled={!newListName.trim()}
+                  disabled={newListName.trim().length === 0}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Criar

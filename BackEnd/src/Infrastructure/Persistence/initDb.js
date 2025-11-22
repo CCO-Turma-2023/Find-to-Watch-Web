@@ -21,7 +21,18 @@ async function initDb() {
         authProvider VARCHAR(50) NOT NULL DEFAULT 'local',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
-      `);
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS listas (
+        id UUID PRIMARY KEY,
+        name VARCHAR(100),
+        user_id UUID NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        isPublic BOOLEAN DEFAULT FALSE,
+        FOREIGN KEY (user_id) REFERENCES usuarios(id));
+    `);
 
     console.log("Banco inicializado com sucesso!");
   } catch (error) {
