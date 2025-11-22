@@ -1,7 +1,7 @@
-import { useRef, type  ReactNode } from 'react';
-import { Toast } from 'primereact/toast';
-import type { ToastMessage } from 'primereact/toast';
-import { ToastContext } from './contexts';
+import { useRef, type ReactNode } from "react";
+import { Toast } from "primereact/toast";
+import type { ToastMessage } from "primereact/toast";
+import { ToastContext } from "./contexts";
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const toastRef = useRef<Toast>(null);
@@ -19,4 +19,3 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     </ToastContext.Provider>
   );
 };
-

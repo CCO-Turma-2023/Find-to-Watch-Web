@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useMedia } from "../../../app/contexts/contexts";
+import { useMedia, useToast } from "../../../app/contexts/contexts";
 import { useEffect, useState, useRef } from "react";
 import type { Media } from "../../../app/interfaces/media";
 import ContentType from "../../components/contentType";
@@ -23,6 +23,7 @@ import max from "../../assets/platforms/max.png";
 import RightArrow from "../../assets/icons/rightArrow";
 import perfilDefault from "../../assets/defaultPerfil.jpg";
 import ListModal from "../../components/listModal";
+import { isTokenValid } from "../../../app/services/api.service";
 
 const platformLogos = [
   {
@@ -96,6 +97,7 @@ export default function InfoContent() {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
+  const { showToast } = useToast();
 
   const handleOpenTrailer = () => {
     if (contentInfo?.trailer) setShowTrailer(true);
@@ -230,6 +232,14 @@ export default function InfoContent() {
               icon={<MarkerIcon />}
               label="Lista"
               onClick={() => {
+                if (!isTokenValid()) {
+                  showToast({
+                    severity: "error",
+                    summary: "Erro",
+                    detail: "Você precisa estar logado para adicionar a lista.",
+                  });
+                  return;
+                }
                 setShowModal(true);
               }}
               variant="secondary"
