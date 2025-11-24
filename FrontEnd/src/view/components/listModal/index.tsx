@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getMyLists } from "../../../app/services/gets/getmyLists";
 import { createList } from "../../../app/services/posts/createList";
+import { saveFilm } from "../../../app/services/posts/saveFilm";
 
 interface ListOption {
   id: number;
   name: string;
-  hasMedia?: boolean; // Simulating if the media is already in the list
+  hasMedia?: boolean;
 }
 
 interface ListModalProps {
@@ -27,6 +28,7 @@ export default function ListModal({
   const [isCreating, setIsCreating] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const [selectedList, setSelectedList] = useState<number | null>(null);
 
   useEffect(() => {
     const funGetLists = async () => {
@@ -37,14 +39,6 @@ export default function ListModal({
     funGetLists();
   }, []);
 
-  const toggleList = (id: number) => {
-    setOptions((prev) =>
-      prev.map((opt) =>
-        opt.id === id ? { ...opt, hasMedia: !opt.hasMedia } : opt,
-      ),
-    );
-  };
-
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
     await createList({ name: newListName, isPublic });
@@ -52,6 +46,12 @@ export default function ListModal({
     setOptions([...options, newList]);
     setNewListName("");
     setIsCreating(false);
+  };
+
+  const handleSaveFilm = async () => {
+    if (!selectedList) return;
+    await saveFilm({ filmId, listId: selectedList });
+    onClose();
   };
 
   return (
@@ -68,7 +68,7 @@ export default function ListModal({
             Você deseja salvar "{filmName}" em:
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleSaveFilm}
             className="rounded-full p-1 text-gray-400 transition hover:bg-gray-800 hover:text-white"
           >
             <svg
@@ -92,40 +92,45 @@ export default function ListModal({
         {options.length > 0 && (
           <div className="custom-scrollbar max-h-[60vh] overflow-y-auto p-4">
             <div className="flex flex-col gap-1">
-              {options.map((option) => (
-                <label
-                  key={option.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-gray-800"
-                >
-                  <div
-                    className={`flex h-5 w-5 items-center justify-center rounded border ${option.hasMedia ? "border-blue-600 bg-blue-600" : "border-gray-500"}`}
+              {options.map((option) => {
+                const isSelected = selectedList === option.id;
+                return (
+                  <label
+                    key={option.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-gray-800"
                   >
-                    {option.hasMedia && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-white"
-                      >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    )}
-                  </div>
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    checked={!!option.hasMedia}
-                    onChange={() => toggleList(option.id)}
-                  />
-                  <span className="text-gray-200">{option.name}</span>
-                </label>
-              ))}
+                    <div
+                      className={`flex h-5 w-5 items-center justify-center rounded border ${isSelected || option.hasMedia ? "border-blue-600 bg-blue-600" : "border-gray-500"}`}
+                    >
+                      {(isSelected || option.hasMedia) && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-white"
+                        >
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      )}
+                    </div>
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      checked={isSelected}
+                      onChange={() =>
+                        setSelectedList(isSelected ? null : option.id)
+                      }
+                    />
+                    <span className="text-gray-200">{option.name}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
         )}

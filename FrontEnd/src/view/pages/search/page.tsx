@@ -13,6 +13,9 @@ export default function SearchPage() {
   const [isSmallScreen, setIsSmallScreen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [genreFilter, setGenreFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+
   useEffect(() => {
     const fetchResults = async () => {
       if (!searchQuery.trim()) {
@@ -71,11 +74,24 @@ export default function SearchPage() {
 
   const stepWidthPx = (isSmallScreen ? 214 : 224) + (isSmallScreen ? 10 : 16);
 
+  const filteredResults = searchResults.filter((item) => {
+    const matchesType =
+      typeFilter === "all" ||
+      (typeFilter === "movie" && item.type === "movie") ||
+      (typeFilter === "tv" && item.type === "tv");
+
+    const matchesGenre =
+      genreFilter === "all" ||
+      (item.genres && item.genres.includes(genreFilter));
+
+    return matchesType && matchesGenre;
+  });
+
   // Adapter para usar o GenreCarousel
   const searchGenreData: genreData = {
     titulo: "Resultados da Pesquisa",
     index: 0,
-    content: searchResults,
+    content: filteredResults,
     page: 1,
     genreId: 0,
     mediaType: "multi",
@@ -83,20 +99,24 @@ export default function SearchPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center bg-[#1f1f1f] p-12">
-      <HeaderSearch onSearch={setSearchQuery} value={searchQuery} />
+      <HeaderSearch
+        onSearch={setSearchQuery}
+        value={searchQuery}
+        onFilterType={setTypeFilter}
+        onFilterGenre={setGenreFilter}
+      />
 
       <div ref={containerRef} className="mt-24 w-full max-w-[90vw] text-white">
         {loading ? (
           <div className="mt-10 flex justify-center">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
           </div>
-        ) : searchResults.length > 0 ? (
+        ) : filteredResults.length > 0 ? (
           <GenreCarousel
             genre={searchGenreData}
             visibleCount={visibleCount}
             viewportWidth={viewportWidth}
             stepWidthPx={stepWidthPx}
-            // updateGenreContent não é necessário para pesquisa simples por enquanto
           />
         ) : searchQuery.trim() ? (
           <div className="mt-10 text-center text-xl">

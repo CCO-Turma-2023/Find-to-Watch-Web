@@ -1,7 +1,8 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useMedia, useToast } from "../../../app/contexts/contexts";
 import { useEffect, useState, useRef } from "react";
 import type { Media } from "../../../app/interfaces/media";
+import { getMediaDetails } from "../../../app/services/gets/getMediaDetails";
 import ContentType from "../../components/contentType";
 import { motion } from "framer-motion";
 import ContentInfos from "../../components/contentInfos";
@@ -90,6 +91,8 @@ const platformLogos = [
 
 export default function InfoContent() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const { type } = location.state || {};
   const [showTrailer, setShowTrailer] = useState(false);
   const [contentInfo, setContentInfo] = useState<Media>();
   const { genres } = useMedia();
@@ -118,23 +121,39 @@ export default function InfoContent() {
   };
 
   useEffect(() => {
+    let found = false;
     genres.forEach((g) => {
       g.content.forEach((item) => {
         if (item.id.toString() === id) {
           setContentInfo(item);
           setVideoId(item.trailer || null);
           localStorage.setItem("lastViewed", JSON.stringify(item));
+          found = true;
         }
       });
     });
 
-    if (!contentInfo) {
-      const lastViewed = localStorage.getItem("lastViewed");
-      if (lastViewed) {
-        setContentInfo(JSON.parse(lastViewed));
+    if (!found) {
+      if (type && id) {
+        getMediaDetails(id, type).then((data) => {
+          if (data) {
+            setContentInfo(data);
+            setVideoId(data.trailer || null);
+            localStorage.setItem("lastViewed", JSON.stringify(data));
+          }
+        });
+      } else {
+        const lastViewed = localStorage.getItem("lastViewed");
+        if (lastViewed) {
+          const parsed = JSON.parse(lastViewed);
+          if (parsed.id.toString() === id) {
+            setContentInfo(parsed);
+            setVideoId(parsed.trailer || null);
+          }
+        }
       }
     }
-  }, [genres, id]);
+  }, [genres, id, type]);
 
   const normalize = (str: string) =>
     str.toLowerCase().replace(/\+/g, "plus").replace(/\s+/g, "").trim();

@@ -16,6 +16,11 @@ class TmdbServices {
     const content = await this.tmdbRequests.searchMedia(query);
     return content;
   }
+
+  async getMediaDetails(id, mediaType) {
+    const content = await this.tmdbRequests.getMediaDetails(id, mediaType);
+    return content;
+  }
 }
 
 module.exports = TmdbServices;

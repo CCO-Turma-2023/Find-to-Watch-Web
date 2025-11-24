@@ -34,7 +34,9 @@ class TmdbController {
       const { query } = req.query;
 
       if (!query) {
-        return res.status(400).json({ message: "O parâmetro 'query' é obrigatório." });
+        return res
+          .status(400)
+          .json({ message: "O parâmetro 'query' é obrigatório." });
       }
 
       const result = await tmdbServices.searchMedia(query);
@@ -42,6 +44,27 @@ class TmdbController {
       return res.status(200).json(result);
     } catch (error) {
       console.error("Erro ao buscar mídia:", error);
+      return res.status(500).json({
+        message: error.message || "Ocorreu um erro interno no servidor.",
+      });
+    }
+  }
+
+  async getMediaDetails(req, res) {
+    try {
+      const { id, type } = req.params;
+
+      if (!id || !type) {
+        return res
+          .status(400)
+          .json({ message: "Os parâmetros 'id' e 'type' são obrigatórios." });
+      }
+
+      const result = await tmdbServices.getMediaDetails(id, type);
+
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Erro ao buscar detalhes da mídia:", error);
       return res.status(500).json({
         message: error.message || "Ocorreu um erro interno no servidor.",
       });

@@ -97,6 +97,7 @@ export default function GenreCarousel({
                     key={media.id}
                     id={media.id}
                     urlImage={media.poster_path}
+                    type={media.type || genre.mediaType}
                   />
                 ))}
               </motion.div>

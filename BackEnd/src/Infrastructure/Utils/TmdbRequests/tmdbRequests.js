@@ -124,6 +124,36 @@ class TmdbRequests {
     return mediaInstances;
   }
 
+  async getMediaDetails(id, mediaType) {
+    const detailsPromise = this.RequestMediabyId(id, mediaType);
+    const providersPromise = this.RequestProviders(id, mediaType);
+    const trailerPromise = this.RequestTrailer(id, mediaType);
+
+    const [data, providers, trailerKey] = await Promise.all([
+      detailsPromise,
+      providersPromise,
+      trailerPromise,
+    ]);
+
+    const item = { ...data };
+    item.type = mediaType;
+    const isMovie = mediaType === "movie";
+    if (!isMovie) {
+      item.title = item.name;
+    }
+
+    item.genres = data.genres.map((genre) => genre.name);
+    item.runtime = isMovie ? data.runtime : data.episode_run_time?.[0] || 0;
+    item.year = (isMovie ? data.release_date : data.first_air_date)?.split(
+      "-"
+    )[0];
+    item.cast = data.cast;
+    item.providers = providers;
+    item.trailer = trailerKey ? trailerKey : null;
+
+    return new Media(item);
+  }
+
   async RequestMediabyId(id, mediaType) {
     const isMovie = mediaType === "movie";
 

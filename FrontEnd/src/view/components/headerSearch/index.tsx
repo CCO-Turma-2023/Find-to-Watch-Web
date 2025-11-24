@@ -32,9 +32,13 @@ declare global {
 export default function HeaderSearch({
   onSearch,
   value,
+  onFilterType,
+  onFilterGenre,
 }: {
   onSearch: (query: string) => void;
   value: string;
+  onFilterType: (type: string) => void;
+  onFilterGenre: (genre: string) => void;
 }) {
   const navigate = useNavigate();
 
@@ -54,7 +58,7 @@ export default function HeaderSearch({
         className="absolute top-4 left-4 z-30 flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/")}
       >
         <LeftArrow />
       </motion.button>
@@ -107,14 +111,14 @@ export default function HeaderSearch({
           onChange={(e) => onFilterGenre(e.target.value)}
         >
           <option value="all">Todos Gêneros</option>
-          <option value="28">Ação</option>
-          <option value="12">Aventura</option>
-          <option value="35">Comédia</option>
-          <option value="18">Drama</option>
-          <option value="14">Fantasia</option>
-          <option value="27">Terror</option>
-          <option value="10749">Romance</option>
-          <option value="878">Ficção Científica</option>
+          <option value="Ação">Ação</option>
+          <option value="Aventura">Aventura</option>
+          <option value="Comédia">Comédia</option>
+          <option value="Drama">Drama</option>
+          <option value="Fantasia">Fantasia</option>
+          <option value="Terror">Terror</option>
+          <option value="Romance">Romance</option>
+          <option value="Ficção científica">Ficção Científica</option>
         </select>
       </div>
     </header>

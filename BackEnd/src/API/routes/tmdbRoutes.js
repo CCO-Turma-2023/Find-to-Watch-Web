@@ -120,6 +120,7 @@ const router = Router();
  *         description: Erro interno no servidor
  */
 router.get("/search", tmdbController.searchMedia);
+router.get("/details/:type/:id", tmdbController.getMediaDetails);
 
 router.post("/category", tmdbController.fetchCategory);
 
