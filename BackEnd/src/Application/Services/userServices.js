@@ -66,9 +66,13 @@ class UserServices {
       let user = await this.userRepository.findByGoogleId(googleId);
 
       if (!user) {
-        const existingUserByEmail = await this.userRepository.findByEmail(email);
+        const existingUserByEmail = await this.userRepository.findByEmail(
+          email
+        );
         if (existingUserByEmail) {
-          throw new Error("Este e-mail já está cadastrado. Faça login com sua senha.");
+          throw new Error(
+            "Este e-mail já está cadastrado. Faça login com sua senha."
+          );
         }
 
         const id = uuidv4();
@@ -78,7 +82,7 @@ class UserServices {
           email,
           username,
           passwordHash: null,
-          authProvider: 'google',
+          authProvider: "google",
         });
       }
 
@@ -91,9 +95,8 @@ class UserServices {
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "8h",
       });
-      
-      return { token };
 
+      return { token };
     } catch (error) {
       console.error("Erro na autenticação com Google:", error);
       throw new Error("Falha ao autenticar com o Google.");
@@ -116,16 +119,21 @@ class UserServices {
     if (existingUser) {
       throw new Error("Este username já está em uso.");
     }
-    
+
     const id = uuidv4();
     const passwordHash = bcrypt.hashSync(password, 10);
-    const user = this.userRepository.create({ id, username, email, passwordHash });
+    const user = await this.userRepository.create({
+      id,
+      username,
+      email,
+      passwordHash,
+    });
 
     const payload = {
       id: user.id,
       username: user.username,
       email: user.email,
-      authProvider: 'local'
+      authProvider: "local",
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {

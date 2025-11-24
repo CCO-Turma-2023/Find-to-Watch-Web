@@ -29,9 +29,8 @@ class ListasRepository {
       [user_id]
     );
 
-    return rows.map(row => new Listas(row));
+    return rows.map((row) => new Listas(row));
   }
-
 
   async getListasById(id) {
     const { rows } = await db.query("SELECT * FROM listas WHERE id = $1", [id]);
@@ -63,10 +62,7 @@ class ListasRepository {
   async getMediaByListId(list_id) {
     try {
       const query = `
-        SELECT m.*
-        FROM listMedia lm
-        JOIN media m ON m.id = lm.media_id
-        WHERE lm.list_id = $1
+        SELECT media_id FROM listMedia WHERE list_id = $1 
       `;
 
       const { rows } = await db.query(query, [list_id]);
@@ -90,8 +86,9 @@ class ListasRepository {
   }
 
   async deleteListas(id) {
+    await db.query("DELETE FROM listMedia WHERE list_id = $1", [id]);
     await db.query("DELETE FROM listas WHERE id = $1", [id]);
-    return this.getListasById(id);
+    return { message: "Lista deletada com sucesso" };
   }
 }
 

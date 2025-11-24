@@ -20,7 +20,7 @@ class ListasController {
 
   async getAllLists(req, res) {
     try {
-      const userId = req.userId
+      const userId = req.userId;
       const listas = await listasServices.getAllLists(userId);
       return res.status(200).json(listas);
     } catch (error) {
@@ -29,20 +29,22 @@ class ListasController {
   }
 
   async getListasById(req, res) {
+    console.log(req.params.id);
     try {
-      const userId = req.userId; 
+      const userId = req.headers["id"];
       const listas = await listasServices.getListasById(userId, req.params.id);
       return res.status(200).json(listas);
     } catch (error) {
-      return res.status(404).json({ message: error.message });
+      const statusCode = error.statusCode || 404;
+      return res.status(statusCode).json({ message: error.message });
     }
   }
 
   async insertMedia(req, res) {
     try {
-      const userId = req.userId; 
-      const { id } = req.params;      
-      const { media_id } = req.body; 
+      const userId = req.userId;
+      const { id } = req.params;
+      const { media_id } = req.body;
 
       if (!media_id) {
         return res.status(400).json({ message: "media_id é obrigatório" });
@@ -52,7 +54,7 @@ class ListasController {
 
       return res.status(201).json({
         message: "Mídia adicionada à lista com sucesso",
-        relation: result
+        relation: result,
       });
     } catch (error) {
       res.status(400).json({ message: `${error.message}` });
@@ -61,42 +63,45 @@ class ListasController {
 
   async getMediaByListId(req, res) {
     try {
-      const userId = req.userId; 
+      const userId = req.headers["id"];
       const { id } = req.params;
       const media = await listasServices.getMediaByListId(userId, id);
 
       return res.status(200).json(media);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Erro ao buscar conteúdos da lista" });
+      const statusCode = error.statusCode || 500;
+      return res.status(statusCode).json({
+        message: error.message || "Erro ao buscar conteúdos da lista",
+      });
     }
   }
 
   async updateListas(req, res) {
-      try {
-        const userId = req.userId;
-        const { id } = req.params;
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
 
-        const listas = await listasServices.updateListas(userId, id, req.body);
-        return res.status(200).json(listas);
-
-      } catch (error) {
-        return res.status(404).json({ message: error.message });
-      }
+      const listas = await listasServices.updateListas(userId, id, req.body);
+      return res.status(200).json(listas);
+    } catch (error) {
+      return res.status(404).json({ message: error.message });
+    }
   }
 
   async deleteListas(req, res) {
-      try {
-        const userId = req.userId;
-        const { id } = req.params;
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
 
-        await listasServices.deleteListas(userId, id);
+      console.log("deu certo?");
 
-        return res.status(204).send();
+      await listasServices.deleteListas(userId, id);
 
-      } catch (error) {
-        return res.status(404).json({ message: error.message });
-      }
+      return res.status(204).send();
+    } catch (error) {
+      return res.status(404).json({ message: error.message });
+    }
   }
 }
 

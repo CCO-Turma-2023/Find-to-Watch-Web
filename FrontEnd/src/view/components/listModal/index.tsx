@@ -50,10 +50,28 @@ export default function ListModal({
   const handleAddToList = async () => {
     if (!selectedList) return;
 
+    const handleMessage = (
+      message: string,
+      severity:
+        | "error"
+        | "success"
+        | "info"
+        | "warn"
+        | "secondary"
+        | "contrast"
+        | undefined,
+      summary: string,
+    ) => {
+      showToast({ severity: severity, summary: summary, detail: message });
+    };
+
     setLoading(true);
-    await saveFilm({ mediaId, listId: selectedList });
+    await saveFilm({
+      mediaId,
+      listId: selectedList,
+      setMessage: handleMessage,
+    });
     setLoading(false);
-    showToast({ severity: 'success', summary: 'Sucessos', detail: 'Conteúdo adicionado à sua lista' });
 
     onClose();
   };
@@ -152,17 +170,16 @@ export default function ListModal({
         )}
 
         {/* Footer */}
-        <div className="border-t border-gray-800 p-4 space-y-3">
-
+        <div className="space-y-3 border-t border-gray-800 p-4">
           {/* Botão para adicionar a mídia à lista */}
           <button
             disabled={!selectedList || loading}
             onClick={handleAddToList}
-            className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition 
-              ${selectedList
+            className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition ${
+              selectedList
                 ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-700 text-gray-400 cursor-not-allowed"
-              }`}
+                : "cursor-not-allowed bg-gray-700 text-gray-400"
+            }`}
           >
             {loading ? "Adicionando..." : "Adicionar à lista"}
           </button>

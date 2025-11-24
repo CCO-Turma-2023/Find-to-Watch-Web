@@ -311,7 +311,6 @@ const authMiddleware = require("../middlewares/authMiddleware");
  *         description: Erro interno do servidor
  */
 
-
 /**
  * @swagger
  * /listas/getMediaByListId/{id}:
@@ -348,6 +347,10 @@ router.post("/createListas", authMiddleware, listasController.createListas);
 router.get("/getAllUserLists", authMiddleware, listasController.getAllLists);
 router.get("/getListasById/:id", listasController.getListasById);
 router.put("/updateListas/:id", authMiddleware, listasController.updateListas);
-router.delete("/deleteListas/:id", authMiddleware, listasController.deleteListas);
+router.delete(
+  "/deleteListas/:id",
+  authMiddleware,
+  listasController.deleteListas
+);
 
-module.exports = router;    
+module.exports = router;

@@ -44,7 +44,7 @@ export default function HeaderPage() {
       <NavButtons title="Home" route="/" />
       <NavButtons title="Séries" route="/series" />
       <NavButtons title="Filmes" route="/movies" />
-      <NavButtons title="Cinema" route="/cinema" />
+      <NavButtons title="Minhas Listas" route="/lists" />
     </>
   );
 

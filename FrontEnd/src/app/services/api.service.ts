@@ -45,10 +45,15 @@ api.interceptors.request.use(
       "/users/google",
       "/tmdb/category",
       "/listas/getMediaByListId",
-      "/listas/getListasById"
+      "/listas/getListasById",
+      "/tmdb/details/tv",
+      "/tmdb/details/movie",
     ];
 
-    if (config.url && publicRoutes.includes(config.url)) {
+    if (
+      config.url &&
+      publicRoutes.some((route) => config.url!.startsWith(route))
+    ) {
       return config;
     }
 

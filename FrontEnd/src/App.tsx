@@ -10,6 +10,7 @@ import AuthPage from "./view/pages/authPage/page";
 import InfoContent from "./view/pages/infoContent/infoContent";
 import SearchPage from "./view/pages/search/page";
 import UserLists from "./view/pages/UserLists/UserLists";
+import ListDetails from "./view/pages/ListDetails/ListDetails";
 
 export default function App() {
   const location = useLocation();
@@ -26,7 +27,7 @@ export default function App() {
         <Route path="/content/:id" element={<InfoContent />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/lists" element={<UserLists />} />
-
+        <Route path="/lists/:id" element={<ListDetails />} />
         <Route element={<AuthGuard />}></Route>
       </Routes>
     </AnimatePresence>
