@@ -34,6 +34,14 @@ async function initDb() {
         FOREIGN KEY (user_id) REFERENCES usuarios(id));
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS listMedia (
+        media_id VARCHAR(100) NOT NULL,
+        list_id UUID NOT NULL, 
+        PRIMARY KEY (media_id, list_id),
+        FOREIGN KEY (list_id) REFERENCES listas(id));
+    `);
+
     console.log("Banco inicializado com sucesso!");
   } catch (error) {
     console.error("Erro na inicialização do banco:", error);

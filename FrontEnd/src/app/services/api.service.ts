@@ -44,6 +44,8 @@ api.interceptors.request.use(
       "/users/",
       "/users/google",
       "/tmdb/category",
+      "/listas/getMediaByListId",
+      "/listas/getListasById"
     ];
 
     if (config.url && publicRoutes.includes(config.url)) {

@@ -170,7 +170,7 @@ export default function InfoContent() {
       {showModal && (
         <ListModal
           filmName={contentInfo?.title || ""}
-          filmId={contentInfo?.id || 0}
+          mediaId={contentInfo?.id || 0}
           onClose={() => setShowModal(false)}
         />
       )}

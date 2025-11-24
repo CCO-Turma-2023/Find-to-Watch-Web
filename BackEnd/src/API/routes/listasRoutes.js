@@ -13,7 +13,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 /**
  * @swagger
- * /api/listas:
+ * /listas/createListas:
  *   post:
  *     summary: Cria uma nova lista
  *     tags: [Listas]
@@ -76,9 +76,9 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 /**
  * @swagger
- * /api/listas:
+ * /listas/getAllUserLists:
  *   get:
- *     summary: Retorna todas as listas públicas
+ *     summary: Retorna todas as listas de um usuario
  *     tags: [Listas]
  *     responses:
  *       200:
@@ -110,9 +110,9 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 /**
  * @swagger
- * /api/listas/{id}:
+ * /listas/getListasById/{id}:
  *   get:
- *     summary: Retorna uma lista pública pelo ID
+ *     summary: Retorna uma lista pelo ID
  *     tags: [Listas]
  *     security:
  *       - bearerAuth: []
@@ -155,7 +155,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 /**
  * @swagger
- * /api/listas/{id}:
+ * /listas/updateListas/{id}:
  *   put:
  *     summary: Atualiza uma lista existente
  *     tags: [Listas]
@@ -229,7 +229,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 /**
  * @swagger
- * /api/listas/{id}:
+ * /listas/deleteListas/{id}:
  *   delete:
  *     summary: Deleta uma lista
  *     tags: [Listas]
@@ -262,11 +262,91 @@ const authMiddleware = require("../middlewares/authMiddleware");
  *         description: Erro interno do servidor
  */
 
+/**
+ * @swagger
+ * /listas/insertMedia/{id}:
+ *   post:
+ *     summary: Insere uma mídia em uma lista
+ *     tags: [Listas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID da lista onde a mídia será adicionada
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               media_id:
+ *                 type: string
+ *                 description: ID da mídia a ser associada à lista
+ *             example:
+ *               media_id: "a2d4e767-2c4b-434b-a92d-1e671212ba21"
+ *     responses:
+ *       201:
+ *         description: Mídia inserida na lista com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 relation:
+ *                   type: object
+ *       400:
+ *         description: Dados inválidos
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Lista não encontrada
+ *       500:
+ *         description: Erro interno do servidor
+ */
 
+
+/**
+ * @swagger
+ * /listas/getMediaByListId/{id}:
+ *   get:
+ *     summary: Retorna todos os conteúdos (mídias) de uma lista
+ *     tags: [Listas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da lista
+ *     responses:
+ *       200:
+ *         description: Conteúdos retornados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       404:
+ *         description: Lista não encontrada
+ *       500:
+ *         description: Erro interno
+ */
+
+router.get("/getMediaByListId/:id", listasController.getMediaByListId);
+router.post("/insertMedia/:id", authMiddleware, listasController.insertMedia);
 router.post("/createListas", authMiddleware, listasController.createListas);
-router.get("/getListasPublics", listasController.getListasPublics);
-router.get("/getListasById/:id", authMiddleware, listasController.getListasById);
-router.get("/getListasByUserId", authMiddleware, listasController.getListasByUserId);
+router.get("/getAllUserLists", authMiddleware, listasController.getAllLists);
+router.get("/getListasById/:id", listasController.getListasById);
 router.put("/updateListas/:id", authMiddleware, listasController.updateListas);
 router.delete("/deleteListas/:id", authMiddleware, listasController.deleteListas);
 

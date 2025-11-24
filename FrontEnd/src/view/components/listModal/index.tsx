@@ -1,56 +1,60 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getMyLists } from "../../../app/services/gets/getmyLists";
+import { getAllLists } from "../../../app/services/gets/getAllLists";
 import { createList } from "../../../app/services/posts/createList";
 import { saveFilm } from "../../../app/services/posts/saveFilm";
-
-interface ListOption {
-  id: number;
-  name: string;
-  hasMedia?: boolean;
-}
+import type { Lista } from "../../../app/interfaces/list";
+import { useToast } from "../../../app/contexts/contexts";
 
 interface ListModalProps {
   filmName: string;
-  filmId: number;
+  mediaId: number;
   onClose: () => void;
 }
 
 export default function ListModal({
   filmName,
-  filmId,
+  mediaId,
   onClose,
 }: ListModalProps) {
-  const [options, setOptions] = useState<ListOption[]>([
-    { id: 1, name: "Assistir Mais Tarde", hasMedia: false },
-    { id: 2, name: "Favoritos", hasMedia: true },
-  ]);
+  const [options, setOptions] = useState<Lista[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [isPublic, setIsPublic] = useState(true);
-  const [selectedList, setSelectedList] = useState<number | null>(null);
+  const [selectedList, setSelectedList] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
+  // 🔵 Carregar todas as listas do usuário
   useEffect(() => {
     const funGetLists = async () => {
-      const response = await getMyLists();
-      setOptions(response);
-      console.log("teste", response);
+      const response = await getAllLists();
+      if (Array.isArray(response)) setOptions(response);
     };
     funGetLists();
   }, []);
 
+  // Criar nova lista
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
-    await createList({ name: newListName, isPublic });
-    const newList = { id: Date.now(), name: newListName, hasMedia: true };
-    setOptions([...options, newList]);
+
+    const created = await createList({ name: newListName, isPublic });
+    if (!created) return;
+
+    setOptions([...options, created]);
     setNewListName("");
     setIsCreating(false);
   };
 
-  const handleSaveFilm = async () => {
+  // 🔵 Adicionar mídia à lista selecionada
+  const handleAddToList = async () => {
     if (!selectedList) return;
-    await saveFilm({ filmId, listId: selectedList });
+
+    setLoading(true);
+    await saveFilm({ mediaId, listId: selectedList });
+    setLoading(false);
+    showToast({ severity: 'success', summary: 'Sucessos', detail: 'Conteúdo adicionado à sua lista' });
+
     onClose();
   };
 
@@ -65,10 +69,11 @@ export default function ListModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-800 p-4">
           <h2 className="text-lg font-semibold text-white">
-            Você deseja salvar "{filmName}" em:
+            Adicionar "{filmName}" em:
           </h2>
+
           <button
-            onClick={handleSaveFilm}
+            onClick={onClose}
             className="rounded-full p-1 text-gray-400 transition hover:bg-gray-800 hover:text-white"
           >
             <svg
@@ -89,20 +94,25 @@ export default function ListModal({
         </div>
 
         {/* Body */}
-        {options.length > 0 && (
+        {options.length > 0 ? (
           <div className="custom-scrollbar max-h-[60vh] overflow-y-auto p-4">
             <div className="flex flex-col gap-1">
               {options.map((option) => {
                 const isSelected = selectedList === option.id;
+
                 return (
                   <label
                     key={option.id}
                     className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-gray-800"
                   >
                     <div
-                      className={`flex h-5 w-5 items-center justify-center rounded border ${isSelected || option.hasMedia ? "border-blue-600 bg-blue-600" : "border-gray-500"}`}
+                      className={`flex h-5 w-5 items-center justify-center rounded border ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-600"
+                          : "border-gray-500"
+                      }`}
                     >
-                      {(isSelected || option.hasMedia) && (
+                      {isSelected && (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="14"
@@ -119,6 +129,7 @@ export default function ListModal({
                         </svg>
                       )}
                     </div>
+
                     <input
                       type="checkbox"
                       className="hidden"
@@ -127,16 +138,36 @@ export default function ListModal({
                         setSelectedList(isSelected ? null : option.id)
                       }
                     />
+
                     <span className="text-gray-200">{option.name}</span>
                   </label>
                 );
               })}
             </div>
           </div>
+        ) : (
+          <p className="p-4 text-center text-gray-400">
+            Você ainda não tem nenhuma lista.
+          </p>
         )}
 
         {/* Footer */}
-        <div className="border-t border-gray-800 p-4">
+        <div className="border-t border-gray-800 p-4 space-y-3">
+
+          {/* Botão para adicionar a mídia à lista */}
+          <button
+            disabled={!selectedList || loading}
+            onClick={handleAddToList}
+            className={`w-full rounded-lg px-4 py-2 text-sm font-medium transition 
+              ${selectedList
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-700 text-gray-400 cursor-not-allowed"
+              }`}
+          >
+            {loading ? "Adicionando..." : "Adicionar à lista"}
+          </button>
+
+          {/* Botão para criar nova lista */}
           {!isCreating ? (
             <button
               onClick={() => setIsCreating(true)}
@@ -163,6 +194,7 @@ export default function ListModal({
               <label className="text-xs font-medium text-gray-400 uppercase">
                 Nome da lista
               </label>
+
               <input
                 autoFocus
                 type="text"
@@ -172,17 +204,19 @@ export default function ListModal({
                 onChange={(e) => setNewListName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateList()}
               />
+
               <label className="text-xs font-medium text-gray-400 uppercase">
                 Privacidade
               </label>
               <select
                 value={String(isPublic)}
                 onChange={(e) => setIsPublic(e.target.value === "true")}
-                className="w-full rounded-lg border border-gray-700 bg-gray-900 p-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-gray-700 bg-gray-900 p-3 text-white"
               >
                 <option value="true">Pública</option>
                 <option value="false">Privada</option>
               </select>
+
               <div className="mt-1 flex justify-end gap-2">
                 <button
                   type="button"
@@ -191,10 +225,11 @@ export default function ListModal({
                 >
                   Cancelar
                 </button>
+
                 <button
                   onClick={handleCreateList}
                   disabled={newListName.trim().length === 0}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
                 >
                   Criar
                 </button>

@@ -12,10 +12,11 @@ class IListasRepository {
         throw new Error("Método 'createListas' não implementado");
     }
     /**
-     * Lista todas as listas públicas.
-     * @returns {Promise<Listas[]>} Uma lista de listas públicas.
+     * Lista todas as listas de um usuario.
+     * @param {string} list_id - O ID do usuario.
+     * @returns {Promise<Listas[]>} Uma lista de listas.
      */
-    getListasPublics() {
+    getAllLists(user_id) {
         throw new Error("Método 'getListasPublics' não implementado");
     }
     /**
@@ -28,12 +29,23 @@ class IListasRepository {
     }
 
     /**
-     * Lista as listas de um usuário específico.
-     * @param {string} userId - O ID do usuário.
-     * @returns {Promise<Listas[]>} Uma lista de listas do usuário.
+     * Insere uma media em uma lista
+     * @param {number} media_id - O ID da media.
+     * @param {string} list_id - O ID da lista.
+     * @returns {Listas} Uma lista de listas do usuário.
      */
-    getListasByUserId(userId) {
-        throw new Error("Método 'getListasByUserId' não implementado");
+    insertMedia(list_id, media_id) {
+        throw new Error("Método 'insertMedia' não implementado");
+    }
+
+    /**
+     * Retorna todas as medias de uma lista
+     * @param {string} list_id - O ID da lista.
+     * @returns {Media[]} Uma lista de medias de uma determina lista.
+     */
+
+    async getMediaByListId(list_id) {
+        throw new Error("Método 'getMediaByListId' não implementado");
     }
 
     /**

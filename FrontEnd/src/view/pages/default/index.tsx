@@ -12,7 +12,7 @@ export default function Default() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         className="z-10 h-[2.5rem] w-[9.375rem] rounded-full bg-[#191919] text-white"
-        onClick={() => window.location.replace("/home")}
+        onClick={() => window.location.replace("/")}
       >
         VOLTAR
       </motion.button>

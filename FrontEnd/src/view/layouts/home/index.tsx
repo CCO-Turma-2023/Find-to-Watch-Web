@@ -13,6 +13,7 @@ import ContentCarousel from "../../components/contentCarousel";
 import TrailerModal from "../../components/trailerModal";
 import ActionButton from "../../components/actionButton";
 import NavigationButton from "../../components/navigationButton";
+import ListModal from "../../components/listModal";
 
 const backgroundVariants = {
   enter: { opacity: 0 },
@@ -44,6 +45,7 @@ export default function HomeLayout() {
   const [indexSelected, setIndexSelected] = useState(0);
   const [direction, setDirection] = useState<"left" | "right">("right");
   const [showTrailer, setShowTrailer] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleNext = useCallback(() => {
     setDirection("right");
@@ -119,19 +121,31 @@ export default function HomeLayout() {
     return () => clearInterval(timer);
   }, [contentInfo.length, isLoading, indexSelected, handleNext, showTrailer]);
 
+  const currentItem = contentInfo[indexSelected];
+
   const backgroundStyle = {
     backgroundImage:
-      contentInfo.length > 0 && contentInfo[indexSelected]?.backdrop_path
-        ? `url(${contentInfo[indexSelected].backdrop_path})`
+      contentInfo.length > 0 && currentItem?.backdrop_path
+        ? `url(${currentItem.backdrop_path})`
         : "none",
     backgroundSize: "cover",
     backgroundPosition: "center",
   };
 
-  const videoId = contentInfo[indexSelected]?.trailer;
+  const videoId = currentItem?.trailer;
 
   return (
     <div className="relative min-h-screen w-full overflow-auto bg-[#1f1f1f] p-4">
+      
+      {/* MODAL da lista corrigido */}
+      {showModal && currentItem && (
+        <ListModal
+          filmName={currentItem.title}
+          mediaId={currentItem.id}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+
       <div className="absolute top-0 right-0 left-0 z-30">
         <HeaderPage />
       </div>
@@ -139,7 +153,7 @@ export default function HomeLayout() {
       <div className="absolute inset-0 z-0">
         <AnimatePresence>
           <motion.div
-            key={contentInfo[indexSelected]?.id || indexSelected}
+            key={currentItem?.id || indexSelected}
             className="absolute inset-0"
             style={backgroundStyle}
             variants={backgroundVariants}
@@ -160,11 +174,9 @@ export default function HomeLayout() {
           <div className="flex w-full flex-grow flex-col items-start justify-center overflow-hidden px-4 sm:px-6 md:px-12">
             <div className="relative flex min-h-[380px] w-full max-w-xs flex-col justify-end sm:max-w-md md:max-w-xl lg:max-w-2xl">
               <AnimatePresence mode="wait" custom={direction}>
-                {!isLoading &&
-                contentInfo.length > 0 &&
-                contentInfo[indexSelected] ? (
+                {!isLoading && currentItem ? (
                   <motion.div
-                    key={contentInfo[indexSelected].id ?? indexSelected}
+                    key={currentItem.id ?? indexSelected}
                     custom={direction}
                     variants={contentVariants}
                     initial="enter"
@@ -177,49 +189,42 @@ export default function HomeLayout() {
                     className="w-full"
                   >
                     <ContentType
-                      type={
-                        contentInfo[indexSelected].type === "movie"
-                          ? "Filme"
-                          : "Série"
-                      }
+                      type={currentItem.type === "movie" ? "Filme" : "Série"}
                     />
+
                     <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
-                      {contentInfo[indexSelected].title}
+                      {currentItem.title}
                     </h2>
+
                     <div className="text-opacity-80 mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white">
-                      {contentInfo[indexSelected].year && (
+                      {currentItem.year && (
                         <ContentInfos
-                          info={contentInfo[indexSelected].year}
+                          info={currentItem.year}
                           bool={
-                            !!contentInfo[indexSelected].runtime ||
-                            (contentInfo[indexSelected].genres?.length ?? 0) > 0
+                            !!currentItem.runtime ||
+                            (currentItem.genres?.length ?? 0) > 0
                           }
                         />
                       )}
-                      {contentInfo[indexSelected].runtime && (
+                      {currentItem.runtime && (
                         <ContentInfos
-                          info={contentInfo[indexSelected].runtime}
-                          bool={
-                            (contentInfo[indexSelected].genres?.length ?? 0) > 0
-                          }
+                          info={currentItem.runtime}
+                          bool={(currentItem.genres?.length ?? 0) > 0}
                         />
                       )}
-                      {contentInfo[indexSelected].genres?.map(
-                        (genre, index) => (
-                          <ContentInfos
-                            key={genre}
-                            info={genre}
-                            bool={
-                              index <
-                              contentInfo[indexSelected].genres.length - 1
-                            }
-                          />
-                        ),
-                      )}
+                      {currentItem.genres?.map((genre, index) => (
+                        <ContentInfos
+                          key={genre}
+                          info={genre}
+                          bool={index < currentItem.genres.length - 1}
+                        />
+                      ))}
                     </div>
+
                     <p className="mt-4 line-clamp-3 text-gray-200 sm:line-clamp-4 md:line-clamp-5">
-                      {contentInfo[indexSelected].overview}
+                      {currentItem.overview}
                     </p>
+
                     <div className="select-non mt-4 flex flex-col items-start justify-start gap-4 sm:flex-row">
                       <ActionButton
                         icon={<PlayIcon />}
@@ -230,6 +235,7 @@ export default function HomeLayout() {
                       <ActionButton
                         icon={<MarkerIcon />}
                         label="Lista"
+                        onClick={() => setShowModal(true)}
                         variant="secondary"
                       />
                     </div>
@@ -252,6 +258,7 @@ export default function HomeLayout() {
           <ContentPlatform />
         </div>
       </div>
+
       <AnimatePresence>
         {showTrailer && videoId && (
           <TrailerModal videoId={videoId} onClose={handleCloseTrailer} />

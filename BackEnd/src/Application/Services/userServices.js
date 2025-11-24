@@ -134,7 +134,7 @@ class UserServices {
     return { token };
   }
 
-  async getMe(id) {
+  async getById(id) {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new Error("Usuário não encontrado.");

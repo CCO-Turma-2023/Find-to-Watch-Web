@@ -23,26 +23,58 @@ class ListasRepository {
     }
   }
 
-  async getListasPublics() {
+  async getAllLists(user_id) {
     const { rows } = await db.query(
-      "SELECT * FROM listas WHERE isPublic = true LIMIT 100"
+      "SELECT * FROM listas WHERE user_id = $1 LIMIT 100",
+      [user_id]
     );
-    return rows.map((row) => new Listas(row));
+
+    return rows.map(row => new Listas(row));
   }
+
 
   async getListasById(id) {
     const { rows } = await db.query("SELECT * FROM listas WHERE id = $1", [id]);
     if (rows.length === 0) {
       return null;
     }
-    return rows[0];
+    return new Listas(rows[0]);
   }
 
-  async getListasByUserId(userId) {
-    const { rows } = await db.query("SELECT * FROM listas WHERE user_id = $1", [
-      userId,
-    ]);
-    return rows;
+  async insertMedia(list_id, media_id) {
+    try {
+      const query = `
+        INSERT INTO listMedia (media_id, list_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *;
+      `;
+
+      const values = [media_id, list_id];
+      const { rows } = await db.query(query, values);
+
+      return rows[0] || null;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async getMediaByListId(list_id) {
+    try {
+      const query = `
+        SELECT m.*
+        FROM listMedia lm
+        JOIN media m ON m.id = lm.media_id
+        WHERE lm.list_id = $1
+      `;
+
+      const { rows } = await db.query(query, [list_id]);
+      return rows;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   async updateListas(id, listas) {

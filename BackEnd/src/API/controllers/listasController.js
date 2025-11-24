@@ -18,9 +18,10 @@ class ListasController {
     }
   }
 
-  async getListasPublics(req, res) {
+  async getAllLists(req, res) {
     try {
-      const listas = await listasServices.getListasPublics();
+      const userId = req.userId
+      const listas = await listasServices.getAllLists(userId);
       return res.status(200).json(listas);
     } catch (error) {
       return res.status(404).json({ message: error.message });
@@ -29,38 +30,73 @@ class ListasController {
 
   async getListasById(req, res) {
     try {
-      const listas = await listasServices.getListasById(req.params.id);
+      const userId = req.userId; 
+      const listas = await listasServices.getListasById(userId, req.params.id);
       return res.status(200).json(listas);
     } catch (error) {
       return res.status(404).json({ message: error.message });
     }
   }
 
-  async getListasByUserId(req, res) {
+  async insertMedia(req, res) {
     try {
-      const listas = await listasServices.getListasByUserId(req.userId);
-      return res.status(200).json(listas);
+      const userId = req.userId; 
+      const { id } = req.params;      
+      const { media_id } = req.body; 
+
+      if (!media_id) {
+        return res.status(400).json({ message: "media_id é obrigatório" });
+      }
+
+      const result = await listasServices.insertMedia(userId, id, media_id);
+
+      return res.status(201).json({
+        message: "Mídia adicionada à lista com sucesso",
+        relation: result
+      });
     } catch (error) {
-      return res.status(404).json({ message: error.message });
+      res.status(400).json({ message: `${error.message}` });
+    }
+  }
+
+  async getMediaByListId(req, res) {
+    try {
+      const userId = req.userId; 
+      const { id } = req.params;
+      const media = await listasServices.getMediaByListId(userId, id);
+
+      return res.status(200).json(media);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Erro ao buscar conteúdos da lista" });
     }
   }
 
   async updateListas(req, res) {
-    try {
-      const listas = await listasServices.updateListas(req.params.id, req.body);
-      return res.status(200).json(listas);
-    } catch (error) {
-      return res.status(404).json({ message: error.message });
-    }
+      try {
+        const userId = req.userId;
+        const { id } = req.params;
+
+        const listas = await listasServices.updateListas(userId, id, req.body);
+        return res.status(200).json(listas);
+
+      } catch (error) {
+        return res.status(404).json({ message: error.message });
+      }
   }
 
   async deleteListas(req, res) {
-    try {
-      await listasServices.deleteListas(req.params.id);
-      return res.status(204).send();
-    } catch (error) {
-      return res.status(404).json({ message: error.message });
-    }
+      try {
+        const userId = req.userId;
+        const { id } = req.params;
+
+        await listasServices.deleteListas(userId, id);
+
+        return res.status(204).send();
+
+      } catch (error) {
+        return res.status(404).json({ message: error.message });
+      }
   }
 }
 

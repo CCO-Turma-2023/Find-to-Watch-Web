@@ -171,6 +171,29 @@ router.post("/google", userController.googleLogin);
 
 router.post("/login", userController.login);
 
+/**
+ * @swagger
+ * /users/:
+ *   get:
+ *     summary: Busca um usuário pelo id
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Usuário encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Sem autorização
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro ao buscar usuários
+ */
+
+router.get("/", userController.getById);
+
 router.use(authMiddleware);
 
 /**
@@ -194,7 +217,30 @@ router.use(authMiddleware);
  *         description: Erro ao buscar usuários
  */
 
-router.get("/me", userController.getMe);
+router.get("/me", userController.getById);
+
+/**
+ * @swagger
+ * /users/:
+ *   get:
+ *     summary: Busca um usuário pelo id
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Usuário encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Sem autorização
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro ao buscar usuários
+ */
+
+router.get("/", userController.getById);
 
 /**
  * @swagger

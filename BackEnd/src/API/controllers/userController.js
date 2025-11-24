@@ -38,9 +38,9 @@ class UserController {
     }
   }
 
-  async getMe(req, res) {
+  async getById(req, res) {
     try {
-      const user = await userServices.getMe(req.userId);
+      const user = await userServices.getById(req.userId);
       return res.status(200).json(user);
     } catch (error) {
       return res.status(404).json({ message: error.message });

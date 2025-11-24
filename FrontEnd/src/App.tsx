@@ -9,6 +9,7 @@ import CinemaPage from "./view/pages/cinema/page";
 import AuthPage from "./view/pages/authPage/page";
 import InfoContent from "./view/pages/infoContent/infoContent";
 import SearchPage from "./view/pages/search/page";
+import UserLists from "./view/pages/UserLists/UserLists";
 
 export default function App() {
   const location = useLocation();
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/cinema" element={<CinemaPage />} />
         <Route path="/content/:id" element={<InfoContent />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/lists" element={<UserLists />} />
 
         <Route element={<AuthGuard />}></Route>
       </Routes>
