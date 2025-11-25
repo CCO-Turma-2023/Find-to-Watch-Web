@@ -38,6 +38,7 @@ class UserController {
       const { passwordHash, ...userResponse } = newUser;
       return res.status(201).json(userResponse);
     } catch (error) {
+      console.error("Erro em createUser:", error);
       return res.status(400).json({ message: error.message });
     }
   }
