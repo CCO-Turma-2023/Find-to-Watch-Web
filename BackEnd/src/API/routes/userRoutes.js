@@ -192,7 +192,7 @@ router.post("/login", userController.login);
  *         description: Erro ao buscar usuários
  */
 
-router.get("/", userController.getById);
+router.get("/:id", userController.getUserByIdPublic);
 
 router.use(authMiddleware);
 

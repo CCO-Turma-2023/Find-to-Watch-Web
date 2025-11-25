@@ -15,15 +15,19 @@ export default function UserLists() {
   const [listas, setListas] = useState<Lista[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  
+  // States para Update
   const [selectedList, setSelectedList] = useState<Lista | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // State para Create
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchListas = async () => {
       try {
         const data = await getAllLists();
-        console.log(data);
         setListas(data);
       } catch {
         setErro("Não foi possível carregar suas listas.");
@@ -49,6 +53,20 @@ export default function UserLists() {
     });
   };
 
+  // --- CREATE ---
+  const handleCreate = async (name: string, isPublic: boolean) => {
+    try {
+      const newList = await createList({ name, isPublic });
+      // Adiciona a nova lista ao estado local imediatamente
+      setListas((prev) => [newList, ...prev]);
+    } catch (error) {
+      console.error("Erro ao criar lista:", error);
+      alert("Erro ao criar lista. Tente novamente.");
+      throw error; // Propaga o erro para o modal parar o loading se necessário
+    }
+  };
+
+  // --- DELETE ---
   const handleDelete = async (e: React.MouseEvent, id: string | number) => {
     e.stopPropagation();
     if (window.confirm("Tem certeza que deseja excluir esta lista?")) {
@@ -62,6 +80,7 @@ export default function UserLists() {
     }
   };
 
+  // --- UPDATE ---
   const handleUpdateClick = (e: React.MouseEvent, lista: Lista) => {
     e.stopPropagation();
     setSelectedList(lista);
@@ -71,14 +90,14 @@ export default function UserLists() {
   const handleUpdate = async (
     id: string | number,
     name: string,
-    isPublic: boolean,
+    isPublic: boolean
   ) => {
     try {
       await updateList(id, { name, isPublic });
       setListas(
         listas.map((lista) =>
-          lista.id === id ? { ...lista, name, isPublic } : lista,
-        ),
+          lista.id === id ? { ...lista, name, isPublic } : lista
+        )
       );
     } catch (error) {
       console.error("Erro ao atualizar lista:", error);
@@ -104,7 +123,7 @@ export default function UserLists() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
       </div>
     );
   }
@@ -119,7 +138,7 @@ export default function UserLists() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
+    <div className="flex min-h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
       <HeaderPage />
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between border-b border-gray-700 pb-4">
@@ -138,6 +157,7 @@ export default function UserLists() {
           </button>
         </div>
 
+        {/* Lista Vazia */}
         {listas.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-gray-600 bg-gray-800 py-12 text-center">
             <p className="text-lg text-gray-400">Nenhuma lista encontrada.</p>
@@ -149,52 +169,56 @@ export default function UserLists() {
             </button>
           </div>
         ) : (
+          /* Grid de Listas */
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {listas.map((lista) => (
               <li key={lista.id}>
                 <button
                   onClick={() => handleListClick(lista.id)}
-                  className="group w-full rounded-xl border border-gray-700 bg-gray-800 p-6 text-left shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-blue-400 hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f] focus:outline-none"
+                  className="group w-full rounded-xl border border-gray-700 bg-gray-800 p-6 text-left shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-blue-400 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f]"
                 >
                   <div className="mb-4 flex items-start justify-between">
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         lista.isPublic
-                          ? "bg-green-700 text-green-100"
-                          : "bg-gray-700 text-gray-100"
+                          ? "bg-green-900/50 text-green-200"
+                          : "bg-gray-700 text-gray-200"
                       }`}
                     >
                       {lista.isPublic ? "Pública" : "Privada"}
                     </span>
-                    <span className="font-mono text-xs text-gray-400">
+                    {/* <span className="font-mono text-xs text-gray-400">
                       #{lista.id}
-                    </span>
+                    </span> */}
+                    
+                    {/* Ações (Editar/Deletar) */}
+                    <div className="flex space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <div
+                        role="button"
+                        onClick={(e) => handleUpdateClick(e, lista)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
+                        title="Editar lista"
+                      >
+                        <Pencil size={16} />
+                      </div>
+                      <div
+                        role="button"
+                        onClick={(e) => handleDelete(e, lista.id)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-red-400"
+                        title="Excluir lista"
+                      >
+                        <Trash2 size={16} />
+                      </div>
+                    </div>
                   </div>
 
                   <h3 className="mb-2 line-clamp-1 text-xl font-semibold text-gray-100 group-hover:text-blue-400">
                     {lista.name}
                   </h3>
 
-                  <div className="flex space-x-2 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      onClick={(e) => handleUpdateClick(e, lista)}
-                      className="rounded p-1 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
-                      title="Editar lista"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => handleDelete(e, lista.id)}
-                      className="rounded p-1 text-gray-400 hover:bg-gray-700 hover:text-red-400"
-                      title="Excluir lista"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-
                   <div className="mt-4 flex items-center border-t border-gray-700 pt-4 text-sm text-gray-400">
                     <svg
-                      className="mr-1.5 h-4 w-4 text-gray-400"
+                      className="mr-1.5 h-4 w-4 text-gray-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

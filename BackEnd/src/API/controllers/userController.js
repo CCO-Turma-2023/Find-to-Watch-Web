@@ -47,6 +47,19 @@ class UserController {
     }
   }
 
+  async getUserByIdPublic(req, res) {
+    try {
+      const { id } = req.params; 
+      const user = await userServices.getById(id);
+      
+      const { passwordHash, googleId, authProvider, email, ...publicUser } = user;
+      
+      return res.status(200).json(publicUser);
+    } catch (error) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+  }
+
   async updateMe(req, res) {
     try {
       const updatedUser = await userServices.updateMe(req.userId, req.body);

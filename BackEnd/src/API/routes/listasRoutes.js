@@ -3,6 +3,7 @@ const router = express.Router();
 
 const listasController = require("../controllers/listasController");
 const authMiddleware = require("../middlewares/authMiddleware");
+const optionalAuthMiddleware = require("../middlewares/optionalAuthMiddleware");
 
 /**
  * @swagger
@@ -341,11 +342,11 @@ const authMiddleware = require("../middlewares/authMiddleware");
  *         description: Erro interno
  */
 
-router.get("/getMediaByListId/:id", listasController.getMediaByListId);
+router.get("/getMediaByListId/:id", optionalAuthMiddleware, listasController.getMediaByListId);
 router.post("/insertMedia/:id", authMiddleware, listasController.insertMedia);
 router.post("/createListas", authMiddleware, listasController.createListas);
 router.get("/getAllUserLists", authMiddleware, listasController.getAllLists);
-router.get("/getListasById/:id", listasController.getListasById);
+router.get("/getListasById/:id", optionalAuthMiddleware, listasController.getListasById);
 router.put("/updateListas/:id", authMiddleware, listasController.updateListas);
 router.delete(
   "/deleteListas/:id",
