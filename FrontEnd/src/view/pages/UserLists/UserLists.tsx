@@ -6,22 +6,20 @@ import { deleteList } from "../../../app/services/deletes/deleteList";
 import { updateList } from "../../../app/services/puts/updateList";
 import { createList } from "../../../app/services/posts/createList";
 import UpdateListModal from "../../components/UpdateListModal/UpdateListModal";
-import CreateListModal from "../../components/CreateListModal/CreateListModal";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import CreateListModal from "../../components/CreateListModal/createListModal";
+import { Pencil, Trash2, Plus, Share2 } from "lucide-react";
 import HeaderPage from "../../components/header";
+import { useToast } from "../../../app/contexts/contexts";
 
 export default function UserLists() {
   const navigate = useNavigate();
   const [listas, setListas] = useState<Lista[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
-  
-  // States para Update
+  const { showToast } = useToast();
+
   const [selectedList, setSelectedList] = useState<Lista | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  // State para Create
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
@@ -53,20 +51,18 @@ export default function UserLists() {
     });
   };
 
-  // --- CREATE ---
   const handleCreate = async (name: string, isPublic: boolean) => {
     try {
       const newList = await createList({ name, isPublic });
-      // Adiciona a nova lista ao estado local imediatamente
+
       setListas((prev) => [newList, ...prev]);
     } catch (error) {
       console.error("Erro ao criar lista:", error);
       alert("Erro ao criar lista. Tente novamente.");
-      throw error; // Propaga o erro para o modal parar o loading se necessário
+      throw error;
     }
   };
 
-  // --- DELETE ---
   const handleDelete = async (e: React.MouseEvent, id: string | number) => {
     e.stopPropagation();
     if (window.confirm("Tem certeza que deseja excluir esta lista?")) {
@@ -80,7 +76,6 @@ export default function UserLists() {
     }
   };
 
-  // --- UPDATE ---
   const handleUpdateClick = (e: React.MouseEvent, lista: Lista) => {
     e.stopPropagation();
     setSelectedList(lista);
@@ -90,14 +85,14 @@ export default function UserLists() {
   const handleUpdate = async (
     id: string | number,
     name: string,
-    isPublic: boolean
+    isPublic: boolean,
   ) => {
     try {
       await updateList(id, { name, isPublic });
       setListas(
         listas.map((lista) =>
-          lista.id === id ? { ...lista, name, isPublic } : lista
-        )
+          lista.id === id ? { ...lista, name, isPublic } : lista,
+        ),
       );
     } catch (error) {
       console.error("Erro ao atualizar lista:", error);
@@ -106,27 +101,32 @@ export default function UserLists() {
     }
   };
 
-  const handleCreate = async (name: string, isPublic: boolean) => {
-    try {
-      const newList = await createList({ name, isPublic });
-      if (newList) {
-        setListas([...listas, newList]);
-      }
-      return newList;
-    } catch (error) {
-      console.error("Erro ao criar lista:", error);
-      alert("Erro ao criar lista. Tente novamente.");
-      return null;
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
+
+  const handleShare = async (e: React.MouseEvent, id: string | number) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(`http://localhost:5173/lists/${id}`);
+      showToast({
+        severity: "success",
+        summary: "Link copiado",
+        detail: "Link copiado para a área de transferência!",
+      });
+    } catch (error) {
+      console.error("Erro ao gerar ou copiar link:", error);
+      showToast({
+        severity: "error",
+        summary: "Erro ao copiar link",
+        detail: "Erro ao copiar link. Tente novamente.",
+      });
+    }
+  };
 
   if (erro) {
     return (
@@ -157,7 +157,6 @@ export default function UserLists() {
           </button>
         </div>
 
-        {/* Lista Vazia */}
         {listas.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-gray-600 bg-gray-800 py-12 text-center">
             <p className="text-lg text-gray-400">Nenhuma lista encontrada.</p>
@@ -169,13 +168,12 @@ export default function UserLists() {
             </button>
           </div>
         ) : (
-          /* Grid de Listas */
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {listas.map((lista) => (
               <li key={lista.id}>
                 <button
                   onClick={() => handleListClick(lista.id)}
-                  className="group w-full rounded-xl border border-gray-700 bg-gray-800 p-6 text-left shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-blue-400 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f]"
+                  className="group w-full rounded-xl border border-gray-700 bg-gray-800 p-6 text-left shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-blue-400 hover:shadow-xl focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f] focus:outline-none"
                 >
                   <div className="mb-4 flex items-start justify-between">
                     <span
@@ -187,11 +185,6 @@ export default function UserLists() {
                     >
                       {lista.isPublic ? "Pública" : "Privada"}
                     </span>
-                    {/* <span className="font-mono text-xs text-gray-400">
-                      #{lista.id}
-                    </span> */}
-                    
-                    {/* Ações (Editar/Deletar) */}
                     <div className="flex space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <div
                         role="button"
@@ -208,6 +201,15 @@ export default function UserLists() {
                         title="Excluir lista"
                       >
                         <Trash2 size={16} />
+                      </div>
+
+                      <div
+                        role="button"
+                        onClick={(e) => handleShare(e, lista.id)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
+                        title="Compartilhar Lista"
+                      >
+                        <Share2 size={16} />
                       </div>
                     </div>
                   </div>
