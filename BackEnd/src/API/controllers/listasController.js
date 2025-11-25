@@ -29,9 +29,8 @@ class ListasController {
   }
 
   async getListasById(req, res) {
-    console.log(req.params.id);
     try {
-      const userId = req.headers["id"];
+      const userId = req.userId
       const listas = await listasServices.getListasById(userId, req.params.id);
       return res.status(200).json(listas);
     } catch (error) {
@@ -63,7 +62,7 @@ class ListasController {
 
   async getMediaByListId(req, res) {
     try {
-      const userId = req.headers["id"];
+      const userId = req.userId
       const { id } = req.params;
       const media = await listasServices.getMediaByListId(userId, id);
 
