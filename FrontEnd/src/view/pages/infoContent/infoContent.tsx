@@ -16,7 +16,6 @@ import perfilDefault from "../../assets/defaultPerfil.jpg";
 import ListModal from "../../components/listModal";
 import { isTokenValid } from "../../../app/services/api.service";
 
-// Importações de imagens (mantidas do seu código original)
 import apple from "../../assets/platforms/apple.png";
 import claro from "../../assets/platforms/claro.png";
 import disney from "../../assets/platforms/disney.png";
@@ -29,16 +28,66 @@ import claroplus from "../../assets/platforms/clarotvplus.png";
 import max from "../../assets/platforms/max.png";
 
 const platformLogos = [
-  { name: "Netflix", logo: netflix, background: "#000000", link: "https://www.netflix.com" },
-  { name: "Amazon Prime Video", logo: prime, background: "#FFFFFF", link: "https://www.primevideo.com" },
-  { name: "Disney Plus", logo: disney, background: "#113CCF", link: "https://www.disneyplus.com" },
-  { name: "HBO Max", logo: max, background: "#ffffff", link: "https://www.hbomax.com" },
-  { name: "Apple TV+", logo: apple, background: "#000000", link: "https://www.apple.com/apple-tv-plus/" },
-  { name: "Paramount Plus", logo: paramount, background: "#ffffff", link: "https://www.paramountplus.com" },
-  { name: "Claro Video", logo: claro, background: "#ffffff", link: "https://www.clarovideo.com" },
-  { name: "Claro+", logo: claroplus, background: "#ffffff", link: "https://www.clarotvplus.com" },
-  { name: "Globoplay", logo: globoplay, background: "#ffffff", link: "https://www.globoplay.com" },
-  { name: "Crunchyroll", logo: crunchyroll, background: "#ff8000", link: "https://www.crunchyroll.com" },
+  {
+    name: "Netflix",
+    logo: netflix,
+    background: "#000000",
+    link: "https://www.netflix.com",
+  },
+  {
+    name: "Amazon Prime Video",
+    logo: prime,
+    background: "#FFFFFF",
+    link: "https://www.primevideo.com",
+  },
+  {
+    name: "Disney Plus",
+    logo: disney,
+    background: "#113CCF",
+    link: "https://www.disneyplus.com",
+  },
+  {
+    name: "HBO Max",
+    logo: max,
+    background: "#ffffff",
+    link: "https://www.hbomax.com",
+  },
+  {
+    name: "Apple TV+",
+    logo: apple,
+    background: "#000000",
+    link: "https://www.apple.com/apple-tv-plus/",
+  },
+  {
+    name: "Paramount Plus",
+    logo: paramount,
+    background: "#ffffff",
+    link: "https://www.paramountplus.com",
+  },
+  {
+    name: "Claro Video",
+    logo: claro,
+    background: "#ffffff",
+    link: "https://www.clarovideo.com",
+  },
+  {
+    name: "Claro+",
+    logo: claroplus,
+    background: "#ffffff",
+    link: "https://www.clarotvplus.com",
+  },
+  {
+    name: "Globoplay",
+    logo: globoplay,
+    background: "#ffffff",
+    link: "https://www.globoplay.com",
+  },
+  {
+    name: "Crunchyroll",
+    logo: crunchyroll,
+    background: "#ff8000",
+    link: "https://www.crunchyroll.com",
+  },
 ];
 
 export default function InfoContent() {
@@ -60,12 +109,12 @@ export default function InfoContent() {
 
   const handleCloseTrailer = () => setShowTrailer(false);
 
-  // Função de scroll melhorada
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollAmount = direction === "left" ? -clientWidth / 2 : clientWidth / 2;
-      
+      const scrollAmount =
+        direction === "left" ? -clientWidth / 2 : clientWidth / 2;
+
       scrollRef.current.scrollTo({
         left: scrollLeft + scrollAmount,
         behavior: "smooth",
@@ -74,7 +123,6 @@ export default function InfoContent() {
   };
 
   useEffect(() => {
-    // Lógica de busca mantida (simplificada para leitura)
     let found = false;
     genres.forEach((g) => {
       g.content.forEach((item) => {
@@ -115,12 +163,12 @@ export default function InfoContent() {
   const availablePlatforms = platformLogos.filter((platform) => {
     if (!contentInfo?.providers) return false;
     return contentInfo.providers.some((p) =>
-      normalize(p).includes(normalize(platform.name))
+      normalize(p).includes(normalize(platform.name)),
     );
   });
 
   return (
-    <div className="relative min-h-screen w-full bg-[#141414] font-sans text-white overflow-x-hidden">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-[#141414] font-sans text-white">
       {showModal && (
         <ListModal
           filmName={contentInfo?.title || ""}
@@ -129,24 +177,22 @@ export default function InfoContent() {
         />
       )}
 
-      {/* --- BACKGROUND HERO SECTION --- */}
-      <div className="absolute top-0 left-0 h-[70vh] md:h-screen w-full z-0">
+      <div className="absolute top-0 left-0 z-0 h-[70vh] w-full md:h-screen">
         <div className="relative h-full w-full">
           <img
             className="h-full w-full object-cover object-top"
             src={contentInfo?.backdrop_path}
             alt={contentInfo?.title}
           />
-          {/* Gradientes para legibilidade */}
+
           <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/60 to-transparent bottom-0 h-full" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/40 to-transparent w-full md:w-2/3" />
+          <div className="absolute inset-0 bottom-0 h-full bg-gradient-to-t from-[#141414] via-[#141414]/60 to-transparent" />
+          <div className="absolute inset-0 w-full bg-gradient-to-r from-[#141414] via-[#141414]/40 to-transparent md:w-2/3" />
         </div>
       </div>
 
-      {/* --- BOTÃO VOLTAR --- */}
       <motion.button
-        className="fixed top-6 left-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm border border-white/10 transition-colors hover:bg-white/20 md:left-8 md:top-8 md:h-12 md:w-12"
+        className="fixed top-6 left-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/50 backdrop-blur-sm transition-colors hover:bg-white/20 md:top-8 md:left-8 md:h-12 md:w-12"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate(-1)}
@@ -154,46 +200,47 @@ export default function InfoContent() {
         <LeftArrow />
       </motion.button>
 
-      {/* --- CONTEÚDO PRINCIPAL --- */}
       <div className="relative z-10 flex flex-col px-4 pt-[35vh] pb-12 md:px-12 md:pt-[30vh] lg:px-20">
-        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col gap-6 max-w-3xl"
+          className="flex max-w-3xl flex-col gap-6"
         >
           {/* Header Infos */}
           <div className="flex flex-col items-start gap-3">
-             {/* Componente de Tipo (Filme/Série) - opcional deixar, mas ajustei margens */}
-             <div className="mb-1">
-               <ContentType type={contentInfo?.type === "movie" ? "Filme" : "Série"} />
-             </div>
+            {/* Componente de Tipo (Filme/Série) - opcional deixar, mas ajustei margens */}
+            <div className="mb-1">
+              <ContentType
+                type={contentInfo?.type === "movie" ? "Filme" : "Série"}
+              />
+            </div>
 
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl drop-shadow-lg">
+            <h1 className="text-4xl leading-tight font-extrabold tracking-tight text-white drop-shadow-lg sm:text-5xl md:text-6xl">
               {contentInfo?.title}
             </h1>
 
             <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-gray-300 md:text-base">
               {contentInfo?.year && (
-                <span className="text-white font-bold">{contentInfo.year}</span>
+                <span className="font-bold text-white">{contentInfo.year}</span>
               )}
-              
+
               {contentInfo?.runtime && (
-                 <>
+                <>
                   <span className="h-1 w-1 rounded-full bg-gray-500"></span>
                   <ContentInfos info={contentInfo.runtime} bool={false} />
-                 </>
+                </>
               )}
-              
+
               {contentInfo?.genres && contentInfo.genres.length > 0 && (
                 <>
                   <span className="h-1 w-1 rounded-full bg-gray-500"></span>
                   <div className="flex gap-2">
                     {contentInfo.genres.map((genre, i) => (
-                       <span key={genre}>
-                          {genre}{i < contentInfo.genres.length - 1 ? ", " : ""}
-                       </span>
+                      <span key={genre}>
+                        {genre}
+                        {i < contentInfo.genres.length - 1 ? ", " : ""}
+                      </span>
                     ))}
                   </div>
                 </>
@@ -201,19 +248,16 @@ export default function InfoContent() {
             </div>
           </div>
 
-          {/* Sinopse */}
-          <p className="text-base leading-relaxed text-gray-300 md:text-lg line-clamp-4 md:line-clamp-none max-w-2xl drop-shadow-md">
+          <p className="line-clamp-4 max-w-2xl text-base leading-relaxed text-gray-300 drop-shadow-md md:line-clamp-none md:text-lg">
             {contentInfo?.overview}
           </p>
 
-          {/* Botões de Ação */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-2">
+          <div className="mt-2 flex flex-col gap-4 sm:flex-row">
             <ActionButton
               icon={<PlayIcon />}
-              label="Assistir Trailer"
+              label="Ver Trailer"
               onClick={handleOpenTrailer}
               variant="primary"
-              // Sugestão: Adicione classes extras no seu componente ActionButton para largura full no mobile
             />
             <ActionButton
               icon={<MarkerIcon />}
@@ -233,10 +277,9 @@ export default function InfoContent() {
             />
           </div>
 
-          {/* Plataformas */}
           {availablePlatforms.length > 0 && (
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
+              <p className="mb-3 text-sm font-semibold tracking-wider text-gray-400 uppercase">
                 Disponível em
               </p>
               <div className="flex flex-wrap gap-3">
@@ -262,33 +305,30 @@ export default function InfoContent() {
           )}
         </motion.div>
 
-        {/* --- ELENCO (CARROSSEL) --- */}
         {contentInfo?.cast && contentInfo?.cast.length > 0 && (
           <div className="mt-16 w-full max-w-[100vw]">
-            <h3 className="text-xl font-bold text-white mb-6 border-l-4 border-blue-600 pl-3">
+            <h3 className="mb-6 border-l-4 border-blue-600 pl-3 text-xl font-bold text-white">
               Elenco Principal
             </h3>
-            
+
             <div className="group relative w-full">
-              {/* Botão Esquerda (Desktop) */}
               <button
                 onClick={() => scroll("left")}
-                className="hidden md:flex absolute left-0 top-1/2 z-20 h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-all duration-300 hover:bg-blue-600 hover:scale-110 group-hover:opacity-100 disabled:opacity-0"
+                className="absolute top-1/2 left-0 z-20 hidden h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-all duration-300 group-hover:opacity-100 hover:scale-110 hover:bg-blue-600 disabled:opacity-0 md:flex"
               >
                 <LeftArrow />
               </button>
 
-              {/* Lista Scrollavel */}
               <div
                 ref={scrollRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth pb-4 scrollbar-hide px-1 snap-x"
+                className="scrollbar-hide flex snap-x gap-4 overflow-x-auto scroll-smooth px-1 pb-4"
               >
                 {contentInfo.cast.map((actor) => (
                   <div
                     key={actor.name}
-                    className="relative min-w-[100px] max-w-[100px] snap-start flex-col items-center gap-2 md:min-w-[120px] md:max-w-[120px]"
+                    className="relative max-w-[100px] min-w-[100px] snap-start flex-col items-center gap-2 md:max-w-[120px] md:min-w-[120px]"
                   >
-                    <div className="relative h-28 w-28 overflow-hidden rounded-full border-2 border-transparent transition-all hover:border-blue-500 md:h-32 md:w-32 mx-auto">
+                    <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-full border-2 border-transparent transition-all hover:border-blue-500 md:h-32 md:w-32">
                       <img
                         src={
                           actor.profile_path
@@ -301,20 +341,17 @@ export default function InfoContent() {
                       />
                     </div>
                     <div className="mt-2 text-center">
-                      <p className="text-sm font-medium text-white line-clamp-1">
+                      <p className="line-clamp-1 text-sm font-medium text-white">
                         {actor.name}
                       </p>
-                      {/* Se tiver info do personagem, é legal por também */}
-                      {/* <p className="text-xs text-gray-400 line-clamp-1">{actor.character}</p> */}
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Botão Direita (Desktop) */}
               <button
                 onClick={() => scroll("right")}
-                className="hidden md:flex absolute right-0 top-1/2 z-20 h-12 w-12 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-all duration-300 hover:bg-blue-600 hover:scale-110 group-hover:opacity-100"
+                className="absolute top-1/2 right-0 z-20 hidden h-12 w-12 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-all duration-300 group-hover:opacity-100 hover:scale-110 hover:bg-blue-600 md:flex"
               >
                 <RightArrow />
               </button>
