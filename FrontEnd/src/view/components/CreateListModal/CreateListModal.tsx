@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import type { Lista } from "../../../app/interfaces/list";
 
 interface CreateListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string, isPublic: boolean) => Promise<Lista | null>;
+  onCreate: (name: string, isPublic: boolean) => Promise<void>;
 }
 
 export default function CreateListModal({
@@ -14,7 +13,7 @@ export default function CreateListModal({
   onCreate,
 }: CreateListModalProps) {
   const [name, setName] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
+  const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -26,11 +25,11 @@ export default function CreateListModal({
     setLoading(true);
     try {
       await onCreate(name, isPublic);
-      setName(""); // Reset form
-      setIsPublic(true);
+      setName(""); // Limpa o form
+      setIsPublic(false);
       onClose();
     } catch (error) {
-      console.error("Erro ao criar lista:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -38,9 +37,9 @@ export default function CreateListModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-[#1f1f1f] p-6 shadow-xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Nova Lista</h2>
+      <div className="w-full max-w-md rounded-xl border border-gray-700 bg-[#1f1f1f] p-6 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-xl font-bold text-white">Nova Lista</h3>
           <button
             onClick={onClose}
             className="rounded-full p-1 text-gray-400 hover:bg-gray-800 hover:text-white"
@@ -49,46 +48,42 @@ export default function CreateListModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label
-              htmlFor="name"
-              className="mb-1 block text-sm font-medium text-gray-300"
-            >
+            <label className="mb-1 block text-sm font-medium text-gray-300">
               Nome da Lista
             </label>
             <input
               type="text"
-              id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-2 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-              placeholder="Ex: Filmes de Terror"
+              placeholder="Ex: Filmes de Terror, Favoritos..."
+              className="w-full rounded-lg border border-gray-600 bg-gray-800 p-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               autoFocus
-              required
             />
           </div>
 
-          <div className="flex items-center space-x-3">
-            <button
-              type="button"
-              onClick={() => setIsPublic(!isPublic)}
-              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f] focus:outline-none ${
-                isPublic ? "bg-blue-600" : "bg-gray-700"
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  isPublic ? "translate-x-5" : "translate-x-0"
-                }`}
+          <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-800 p-3">
+            <div className="flex h-5 items-center">
+              <input
+                id="isPublic"
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-600 focus:ring-offset-gray-800"
               />
-            </button>
-            <span className="text-sm font-medium text-gray-300">
-              {isPublic ? "Lista Pública" : "Lista Privada"}
-            </span>
+            </div>
+            <div className="text-sm">
+              <label htmlFor="isPublic" className="font-medium text-white">
+                Lista Pública?
+              </label>
+              <p className="text-xs text-gray-400">
+                Se marcado, qualquer pessoa com o link poderá ver esta lista.
+              </p>
+            </div>
           </div>
 
-          <div className="mt-6 flex justify-end space-x-3">
+          <div className="mt-2 flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
@@ -99,7 +94,7 @@ export default function CreateListModal({
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f] focus:outline-none disabled:opacity-50"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? "Criando..." : "Criar Lista"}
             </button>
