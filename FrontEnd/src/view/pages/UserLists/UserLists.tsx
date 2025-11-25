@@ -4,10 +4,10 @@ import { getAllLists } from "../../../app/services/gets/getAllLists";
 import type { Lista } from "../../../app/interfaces/list";
 import { deleteList } from "../../../app/services/deletes/deleteList";
 import { updateList } from "../../../app/services/puts/updateList";
-import { createList } from "../../../app/services/posts/createList"; // Importando o service novo
+import { createList } from "../../../app/services/posts/createList";
 import UpdateListModal from "../../components/UpdateListModal/UpdateListModal";
-import CreateListModal from "../../components/createListModal/createListModal"; // Importando o modal novo
-import { Pencil, Trash2, Plus } from "lucide-react"; // Adicionei o ícone Plus
+import CreateListModal from "../../components/CreateListModal/CreateListModal";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import HeaderPage from "../../components/header";
 
 export default function UserLists() {
@@ -19,6 +19,7 @@ export default function UserLists() {
   // States para Update
   const [selectedList, setSelectedList] = useState<Lista | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // State para Create
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -105,6 +106,20 @@ export default function UserLists() {
     }
   };
 
+  const handleCreate = async (name: string, isPublic: boolean) => {
+    try {
+      const newList = await createList({ name, isPublic });
+      if (newList) {
+        setListas([...listas, newList]);
+      }
+      return newList;
+    } catch (error) {
+      console.error("Erro ao criar lista:", error);
+      alert("Erro ao criar lista. Tente novamente.");
+      return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -126,22 +141,20 @@ export default function UserLists() {
     <div className="flex min-h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
       <HeaderPage />
       <div className="px-4 py-8 sm:px-6 lg:px-8">
-        {/* Cabeçalho da Seção */}
         <div className="mb-8 flex items-center justify-between border-b border-gray-700 pb-4">
           <div>
             <h2 className="text-3xl font-bold text-white">Minhas Listas</h2>
-            <p className="mt-1 text-gray-300">Gerencie e acesse suas coleções</p>
+            <p className="mt-1 text-gray-300">
+              Gerencie e acesse suas coleções
+            </p>
           </div>
-          {/* Botão de Criar no Topo (aparece se já houver listas) */}
-          {listas.length > 0 && (
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              <Plus size={20} />
-              Nova Lista
-            </button>
-          )}
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f] focus:outline-none"
+          >
+            <Plus size={20} />
+            <span className="hidden sm:inline">Nova Lista</span>
+          </button>
         </div>
 
         {/* Lista Vazia */}
@@ -150,9 +163,8 @@ export default function UserLists() {
             <p className="text-lg text-gray-400">Nenhuma lista encontrada.</p>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+              className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
             >
-              <Plus size={20} />
               Criar nova lista
             </button>
           </div>
@@ -233,7 +245,6 @@ export default function UserLists() {
           lista={selectedList}
         />
 
-        {/* Novo Modal de Criação */}
         <CreateListModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}

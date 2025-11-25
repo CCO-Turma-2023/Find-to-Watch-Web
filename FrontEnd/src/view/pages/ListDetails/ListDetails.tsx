@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { getListById } from "../../../app/services/gets/getListById";
 import { getMediaByListId } from "../../../app/services/gets/getMediaByListId";
 import { getMediaDetails } from "../../../app/services/gets/getMediaDetails";
 import { getUserById, type UserPublicProfile } from "../../../app/services/gets/getUserById"; // Import novo
 import HeaderPage from "../../components/header";
 import MediaContent from "../../components/mediaContent";
+import LeftArrow from "../../assets/icons/leftArrow";
 import type { Lista } from "../../../app/interfaces/list";
 import type { Media } from "../../../app/interfaces/media";
 import { User, Calendar, Film, Tv } from "lucide-react"; // Ícones para embelezar
 
 export default function ListDetails() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   
   const [lista, setLista] = useState<Lista | null>(null);
@@ -102,6 +105,14 @@ export default function ListDetails() {
   return (
     <div className="flex min-h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
       <HeaderPage />
+      <motion.button
+        className="relative top-4 left-4 z-30 flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/lists")}
+      >
+        <LeftArrow />
+      </motion.button>
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         
         {/* Cabeçalho da Lista */}

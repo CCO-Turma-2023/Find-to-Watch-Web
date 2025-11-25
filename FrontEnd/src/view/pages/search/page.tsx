@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import HeaderSearch from "../../components/headerSearch";
 import { searchMedia } from "../../../app/services/gets/searchMedia";
+import { getMedias } from "../../../app/services/gets/getMedias";
 import type { Media, genreData } from "../../../app/interfaces/media";
 import GenreCarousel from "../../components/genreCarousel";
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Media[]>([]);
+  const [defaultResults, setDefaultResults] = useState<Media[]>([]);
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -15,6 +17,29 @@ export default function SearchPage() {
 
   const [genreFilter, setGenreFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+
+  // Busca conteúdo inicial (Filmes e Séries em Alta)
+  useEffect(() => {
+    const fetchDefaultContent = async () => {
+      setLoading(true);
+      const [movies, series] = await Promise.all([
+        getMedias({ page: 1, genreId: 0, mediaType: "movie" }),
+        getMedias({ page: 1, genreId: 0, mediaType: "tv" }),
+      ]);
+
+      const combinedResults: Media[] = [];
+      const maxLength = Math.max(movies?.length || 0, series?.length || 0);
+
+      for (let i = 0; i < maxLength; i++) {
+        if (movies && movies[i]) combinedResults.push(movies[i]);
+        if (series && series[i]) combinedResults.push(series[i]);
+      }
+
+      setDefaultResults(combinedResults);
+      setLoading(false);
+    };
+    fetchDefaultContent();
+  }, []);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -74,7 +99,9 @@ export default function SearchPage() {
 
   const stepWidthPx = (isSmallScreen ? 214 : 224) + (isSmallScreen ? 10 : 16);
 
-  const filteredResults = searchResults.filter((item) => {
+  const activeResults = searchQuery.trim() ? searchResults : defaultResults;
+
+  const filteredResults = activeResults.filter((item) => {
     const matchesType =
       typeFilter === "all" ||
       (typeFilter === "movie" && item.type === "movie") ||
@@ -89,7 +116,9 @@ export default function SearchPage() {
 
   // Adapter para usar o GenreCarousel
   const searchGenreData: genreData = {
-    titulo: "Resultados da Pesquisa",
+    titulo: searchQuery.trim()
+      ? "Resultados da Pesquisa"
+      : "Filmes e Séries em Alta",
     index: 0,
     content: filteredResults,
     page: 1,

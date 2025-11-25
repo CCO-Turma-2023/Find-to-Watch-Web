@@ -43,7 +43,7 @@ api.interceptors.request.use(
       "/listas/getListasById",    
       "/tmdb/details/tv",
       "/tmdb/details/movie",
-      "/tmdb/search"
+      "/tmdb/search",
     ];
 
     const isOptionalRoute = config.url && optionalAuthRoutes.some((route) => config.url!.startsWith(route));
