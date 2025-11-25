@@ -125,7 +125,7 @@ describe("Cobertura Completa de Rotas (Users, Listas, TMDB)", () => {
       }
     });
 
-    // 3. Details (GET /tmdb/details/:type/:id) -> ESTAVA FALTANDO
+    // 3. Details (GET /tmdb/details/:type/:id)
     it("GET /tmdb/details/:type/:id - Deve buscar detalhes específicos", async () => {
       const res = await request(app).get(
         `/api/tmdb/details/movie/${mockMediaId}`
@@ -199,21 +199,42 @@ describe("Cobertura Completa de Rotas (Users, Listas, TMDB)", () => {
       expect(res.body.message).toBeTruthy();
     });
 
-    // 6. Get Media Content (GET /listas/getMediaByListId/:id) -> ESTAVA FALTANDO
+    // 6. Get Media Content (GET /listas/getMediaByListId/:id)
     it("GET /listas/getMediaByListId/:id - Deve retornar itens da lista", async () => {
       const res = await request(app)
         .get(`/api/listas/getMediaByListId/${listId}`)
-        .set("Authorization", `Bearer ${authToken}`); // OptionalAuth
+        .set("Authorization", `Bearer ${authToken}`);
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
-      // Validação opcional: verificar se a media inserida está lá
+
       if (res.body.length > 0) {
-        // Depende da estrutura do seu banco (se popula o objeto ou traz só o ID)
         const item = res.body[0];
         const itemId = item.media_id || item.id || item;
         expect(itemId.toString()).toContain(mockMediaId);
       }
+    });
+
+    // 7. Remove Media (DELETE /listas/removeMedia/:id)
+    it("DELETE /listas/removeMedia/:id - Deve remover mídia da lista", async () => {
+      const res = await request(app)
+        .delete(`/api/listas/removeMedia/${listId}`)
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({ media_id: mockMediaId });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.message).toMatch(/removido/i);
+
+      // Verificação: O item não deve mais estar na lista
+      const checkRes = await request(app)
+        .get(`/api/listas/getMediaByListId/${listId}`)
+        .set("Authorization", `Bearer ${authToken}`);
+
+      const items = checkRes.body;
+      const found = items.find(
+        (i) => (i.media_id || i.id || i).toString() === mockMediaId
+      );
+      expect(found).toBeUndefined();
     });
   });
 

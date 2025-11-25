@@ -204,14 +204,16 @@ export default function UserLists() {
                         <Trash2 size={16} />
                       </div>
 
-                      <div
-                        role="button"
-                        onClick={(e) => handleShare(e, lista.id)}
-                        className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
-                        title="Compartilhar Lista"
-                      >
-                        <Share2 size={16} />
-                      </div>
+                      {lista.isPublic && (
+                        <div
+                          role="button"
+                          onClick={(e) => handleShare(e, lista.id)}
+                          className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
+                          title="Compartilhar Lista"
+                        >
+                          <Share2 size={16} />
+                        </div>
+                      )}
                     </div>
                   </div>
 
