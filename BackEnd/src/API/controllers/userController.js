@@ -17,14 +17,18 @@ class UserController {
     try {
       const { code } = req.body;
       if (!code) {
-        return res.status(400).json({ message: "Código de autorização não fornecido." });
+        return res
+          .status(400)
+          .json({ message: "Código de autorização não fornecido." });
       }
-    
+
       const result = await userServices.loginOrRegisterWithGoogle({ code });
-      
+
       return res.status(200).json(result);
     } catch (error) {
-      return res.status(401).json({ message: error.message || "Falha na autenticação com Google." });
+      return res.status(401).json({
+        message: error.message || "Falha na autenticação com Google.",
+      });
     }
   }
 
@@ -44,6 +48,20 @@ class UserController {
       return res.status(200).json(user);
     } catch (error) {
       return res.status(404).json({ message: error.message });
+    }
+  }
+
+  async getUserByIdPublic(req, res) {
+    try {
+      const { id } = req.params;
+      const user = await userServices.getById(id);
+
+      const { passwordHash, googleId, authProvider, email, ...publicUser } =
+        user;
+
+      return res.status(200).json(publicUser);
+    } catch (error) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
     }
   }
 

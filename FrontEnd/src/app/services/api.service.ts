@@ -11,25 +11,20 @@ export interface DecodedToken {
 
 export const decodeToken = (): DecodedToken | undefined => {
   const token = localStorage.getItem("token");
+  if (!token) return undefined;
 
-  if (!token) {
+  try {
+    return jwtDecode(token);
+  } catch {
     return undefined;
   }
-
-  const decodedToken: DecodedToken = jwtDecode(token);
-
-  return decodedToken;
 };
 
 export const isTokenValid = (): boolean => {
   const decodedToken = decodeToken();
-
-  if (!decodedToken) {
-    return false;
-  }
+  if (!decodedToken) return false;
 
   const currentTime = Date.now() / 1000;
-
   return decodedToken.exp > currentTime;
 };
 
@@ -39,9 +34,9 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const publicRoutes = [
+    const optionalAuthRoutes = [
       "/users/login",
-      "/users/",
+      "/users",
       "/users/google",
       "/tmdb/category",
       "/listas/getMediaByListId",
@@ -51,27 +46,30 @@ api.interceptors.request.use(
       "/tmdb/search",
     ];
 
-    if (
+    const isOptionalRoute =
       config.url &&
-      publicRoutes.some((route) => config.url!.startsWith(route))
-    ) {
+      optionalAuthRoutes.some((route) => config.url!.startsWith(route));
+    const hasValidToken = isTokenValid();
+
+    if (hasValidToken) {
+      const token = localStorage.getItem("token");
+      config.headers.Authorization = `Bearer ${token}`;
       return config;
     }
 
-    if (isTokenValid()) {
-      const token = localStorage.getItem("token");
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      localStorage.removeItem("token");
-
-      if (window.location.pathname !== "/auth") {
-        window.location.replace("/auth");
-      }
-
-      return Promise.reject(new Error("Token expirado ou inválido."));
+    if (isOptionalRoute) {
+      return config;
     }
 
-    return config;
+    localStorage.removeItem("token");
+
+    if (window.location.pathname !== "/auth") {
+      window.location.replace("/auth");
+    }
+
+    return Promise.reject(
+      new Error("Token expirado ou necessário para esta ação."),
+    );
   },
   (error) => {
     return Promise.reject(error);

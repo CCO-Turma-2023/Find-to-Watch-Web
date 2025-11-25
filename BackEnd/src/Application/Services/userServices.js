@@ -155,7 +155,8 @@ class UserServices {
     if (!user) {
       throw new Error("Usuário não encontrado.");
     }
-    return this.userRepository.update(id, userData);
+    const updatedData = { ...user, ...userData };
+    return this.userRepository.update(id, updatedData);
   }
 
   async deleteMe(id) {

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import defaultContent from "../../assets/defaultContent.png";
 
 export default function MediaContent({
   urlImage,
@@ -20,7 +21,11 @@ export default function MediaContent({
         navigate(`/content/${id}`, { state: { type } });
       }}
     >
-      <img className="h-full w-full object-contain" src={urlImage} alt="" />
+      <img
+        className="h-full w-full object-cover"
+        src={urlImage || defaultContent}
+        alt=""
+      />
     </motion.button>
   );
 }

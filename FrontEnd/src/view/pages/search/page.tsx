@@ -18,7 +18,6 @@ export default function SearchPage() {
   const [genreFilter, setGenreFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  // Busca conteúdo inicial (Filmes e Séries em Alta)
   useEffect(() => {
     const fetchDefaultContent = async () => {
       setLoading(true);
@@ -63,7 +62,6 @@ export default function SearchPage() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  // Responsividade (Copiado do ContentCarousel para manter consistência)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;

@@ -6,15 +6,18 @@ import { deleteList } from "../../../app/services/deletes/deleteList";
 import { updateList } from "../../../app/services/puts/updateList";
 import { createList } from "../../../app/services/posts/createList";
 import UpdateListModal from "../../components/UpdateListModal/UpdateListModal";
-import CreateListModal from "../../components/CreateListModal/CreateListModal";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import CreateListModal from "../../components/CreateListModal/createListModal";
+import { Pencil, Trash2, Plus, Share2 } from "lucide-react";
 import HeaderPage from "../../components/header";
+import { useToast } from "../../../app/contexts/contexts";
 
 export default function UserLists() {
   const navigate = useNavigate();
   const [listas, setListas] = useState<Lista[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const { showToast } = useToast();
+
   const [selectedList, setSelectedList] = useState<Lista | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -23,7 +26,6 @@ export default function UserLists() {
     const fetchListas = async () => {
       try {
         const data = await getAllLists();
-        console.log(data);
         setListas(data);
       } catch {
         setErro("Não foi possível carregar suas listas.");
@@ -47,6 +49,18 @@ export default function UserLists() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const handleCreate = async (name: string, isPublic: boolean) => {
+    try {
+      const newList = await createList({ name, isPublic });
+
+      setListas((prev) => [newList, ...prev]);
+    } catch (error) {
+      console.error("Erro ao criar lista:", error);
+      alert("Erro ao criar lista. Tente novamente.");
+      throw error;
+    }
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string | number) => {
@@ -87,20 +101,6 @@ export default function UserLists() {
     }
   };
 
-  const handleCreate = async (name: string, isPublic: boolean) => {
-    try {
-      const newList = await createList({ name, isPublic });
-      if (newList) {
-        setListas([...listas, newList]);
-      }
-      return newList;
-    } catch (error) {
-      console.error("Erro ao criar lista:", error);
-      alert("Erro ao criar lista. Tente novamente.");
-      return null;
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -108,6 +108,25 @@ export default function UserLists() {
       </div>
     );
   }
+
+  const handleShare = async (e: React.MouseEvent, id: string | number) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(`http://localhost:5173/lists/${id}`);
+      showToast({
+        severity: "success",
+        summary: "Link copiado",
+        detail: "Link copiado para a área de transferência!",
+      });
+    } catch (error) {
+      console.error("Erro ao gerar ou copiar link:", error);
+      showToast({
+        severity: "error",
+        summary: "Erro ao copiar link",
+        detail: "Erro ao copiar link. Tente novamente.",
+      });
+    }
+  };
 
   if (erro) {
     return (
@@ -119,7 +138,7 @@ export default function UserLists() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
+    <div className="flex min-h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
       <HeaderPage />
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between border-b border-gray-700 pb-4">
@@ -160,41 +179,48 @@ export default function UserLists() {
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         lista.isPublic
-                          ? "bg-green-700 text-green-100"
-                          : "bg-gray-700 text-gray-100"
+                          ? "bg-green-900/50 text-green-200"
+                          : "bg-gray-700 text-gray-200"
                       }`}
                     >
                       {lista.isPublic ? "Pública" : "Privada"}
                     </span>
-                    <span className="font-mono text-xs text-gray-400">
-                      #{lista.id}
-                    </span>
+                    <div className="flex space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <div
+                        role="button"
+                        onClick={(e) => handleUpdateClick(e, lista)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
+                        title="Editar lista"
+                      >
+                        <Pencil size={16} />
+                      </div>
+                      <div
+                        role="button"
+                        onClick={(e) => handleDelete(e, lista.id)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-red-400"
+                        title="Excluir lista"
+                      >
+                        <Trash2 size={16} />
+                      </div>
+
+                      <div
+                        role="button"
+                        onClick={(e) => handleShare(e, lista.id)}
+                        className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
+                        title="Compartilhar Lista"
+                      >
+                        <Share2 size={16} />
+                      </div>
+                    </div>
                   </div>
 
                   <h3 className="mb-2 line-clamp-1 text-xl font-semibold text-gray-100 group-hover:text-blue-400">
                     {lista.name}
                   </h3>
 
-                  <div className="flex space-x-2 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      onClick={(e) => handleUpdateClick(e, lista)}
-                      className="rounded p-1 text-gray-400 hover:bg-gray-700 hover:text-blue-400"
-                      title="Editar lista"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => handleDelete(e, lista.id)}
-                      className="rounded p-1 text-gray-400 hover:bg-gray-700 hover:text-red-400"
-                      title="Excluir lista"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-
                   <div className="mt-4 flex items-center border-t border-gray-700 pt-4 text-sm text-gray-400">
                     <svg
-                      className="mr-1.5 h-4 w-4 text-gray-400"
+                      className="mr-1.5 h-4 w-4 text-gray-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

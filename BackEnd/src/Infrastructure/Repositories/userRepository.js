@@ -14,9 +14,10 @@ class UserRepository extends IUserRepository {
   }
 
   async findByGoogleId(googleId) {
-    const { rows } = await db.query('SELECT * FROM usuarios WHERE googleid = $1', [
-      googleId,
-    ]);
+    const { rows } = await db.query(
+      "SELECT * FROM usuarios WHERE googleid = $1",
+      [googleId]
+    );
     if (rows.length === 0) {
       return null;
     }
@@ -24,9 +25,10 @@ class UserRepository extends IUserRepository {
   }
 
   async findByUsername(username) {
-    const { rows } = await db.query("SELECT * FROM usuarios WHERE username = $1", [
-      username,
-    ]);
+    const { rows } = await db.query(
+      "SELECT * FROM usuarios WHERE username = $1",
+      [username]
+    );
     if (rows.length === 0) {
       return null;
     }
@@ -35,7 +37,7 @@ class UserRepository extends IUserRepository {
 
   async findById(id) {
     const { rows } = await db.query(
-      "SELECT id, username, email, googleId, authProvider created_at, updated_at FROM usuarios WHERE id = $1",
+      "SELECT id, username, email, googleId, authProvider, created_at, updated_at FROM usuarios WHERE id = $1",
       [id]
     );
     if (rows.length === 0) {
@@ -53,12 +55,12 @@ class UserRepository extends IUserRepository {
     `;
 
     const values = [
-      id, 
-      username, 
-      email, 
-      passwordHash || null, 
-      googleId || null, 
-      authProvider || 'local'
+      id,
+      username,
+      email,
+      passwordHash || null,
+      googleId || null,
+      authProvider || "local",
     ];
 
     await db.query(query, values);

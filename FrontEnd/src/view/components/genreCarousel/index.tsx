@@ -33,10 +33,15 @@ export default function GenreCarousel({
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const [isScrolling, setIsScrolling] = useState(false);
+
   const maxIndex = Math.max(0, genre.content.length - visibleCount);
   const translationValuePx = currentIndex * stepWidthPx;
 
   const handleNext = async () => {
+    if (isScrolling) return;
+    setIsScrolling(true);
+
     const newIndex = currentIndex + 1;
     if (newIndex > maxIndex - 1) {
       if (updateGenreContent) {
@@ -57,9 +62,15 @@ export default function GenreCarousel({
       }
     }
     setCurrentIndex(Math.min(newIndex, maxIndex + 1));
+    setTimeout(() => setIsScrolling(false), 500);
   };
 
-  const handlePrev = () => setCurrentIndex((prev) => Math.max(prev - 1, 0));
+  const handlePrev = () => {
+    if (isScrolling) return;
+    setIsScrolling(true);
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
+    setTimeout(() => setIsScrolling(false), 500);
+  };
 
   return (
     <div ref={ref} className="flex w-full flex-col gap-2 md:gap-4">

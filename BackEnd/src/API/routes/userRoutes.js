@@ -90,8 +90,8 @@ router.post("/", userController.createUser);
  *     summary: Realiza o login ou registro de um usuário com o Google
  *     tags: [Users]
  *     description: |
- *       Autentica um usuário usando um token de acesso do Google.  
- *       Se o usuário não existir no banco de dados, um novo usuário será criado com as informações do perfil do Google.  
+ *       Autentica um usuário usando um token de acesso do Google.
+ *       Se o usuário não existir no banco de dados, um novo usuário será criado com as informações do perfil do Google.
  *       Se o usuário já existir, ele será logado e um token JWT será retornado.
  *     requestBody:
  *       required: true
@@ -173,6 +173,28 @@ router.post("/login", userController.login);
 
 /**
  * @swagger
+ * /users/me:
+ *   get:
+ *     summary: Busca o atual usuário
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Usuário encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Sem autorização
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro ao buscar usuários
+ */
+router.get("/me", authMiddleware, userController.getById);
+
+/**
+ * @swagger
  * /users/:
  *   get:
  *     summary: Busca um usuário pelo id
@@ -192,32 +214,9 @@ router.post("/login", userController.login);
  *         description: Erro ao buscar usuários
  */
 
-router.get("/", userController.getById);
+router.get("/:id", userController.getUserByIdPublic);
 
 router.use(authMiddleware);
-
-/**
- * @swagger
- * /users/me:
- *   get:
- *     summary: Busca o atual usuário
- *     tags: [Users]
- *     responses:
- *       200:
- *         description: Usuário encontrado
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       401:
- *         description: Sem autorização
- *       404:
- *         description: Usuário não encontrado
- *       500:
- *         description: Erro ao buscar usuários
- */
-
-router.get("/me", userController.getById);
 
 /**
  * @swagger

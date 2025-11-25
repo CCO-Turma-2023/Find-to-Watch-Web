@@ -1,0 +1,32 @@
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+
+module.exports = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return next();
+  }
+
+  const parts = authHeader.split(" ");
+
+  if (parts.length !== 2) {
+    return next();
+  }
+
+  const [scheme, token] = parts;
+
+  if (!/^Bearer$/i.test(scheme)) {
+    return next();
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return next();
+    }
+
+    req.userId = decoded.id;
+    req.tipoUser = decoded.tipo;
+    return next();
+  });
+};
