@@ -125,7 +125,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-[#1f1f1f] p-12">
+    <div className="flex min-h-screen w-full flex-col items-center bg-[#0a0a0a] p-12">
       <HeaderSearch
         onSearch={setSearchQuery}
         value={searchQuery}

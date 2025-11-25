@@ -53,7 +53,7 @@ export default function HeaderSearch({
   };
 
   return (
-    <header className="absolute top-0 flex w-full items-center justify-center gap-6 border-b-2 border-[#3c4043] bg-[#1f1f1f] p-4">
+    <header className="absolute top-0 flex w-full items-center justify-center gap-6 border-b-2 border-[#3c4043] bg-[#0a0a0a] p-4">
       <motion.button
         className="absolute top-4 left-4 z-30 flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12"
         whileHover={{ scale: 1.05 }}

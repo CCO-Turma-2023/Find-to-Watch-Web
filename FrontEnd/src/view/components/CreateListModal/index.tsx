@@ -37,7 +37,7 @@ export default function CreateListModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-gray-700 bg-[#1f1f1f] p-6 shadow-2xl">
+      <div className="w-full max-w-md rounded-xl border border-gray-700 bg-[#0a0a0a] p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-bold text-white">Nova Lista</h3>
           <button
@@ -58,7 +58,7 @@ export default function CreateListModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Filmes de Terror, Favoritos..."
-              className="w-full rounded-lg border border-gray-600 bg-gray-800 p-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-600 bg-gray-800 p-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
               autoFocus
             />
           </div>
