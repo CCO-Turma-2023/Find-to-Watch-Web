@@ -48,6 +48,7 @@ api.interceptors.request.use(
       "/listas/getListasById",
       "/tmdb/details/tv",
       "/tmdb/details/movie",
+      "/tmdb/search",
     ];
 
     if (

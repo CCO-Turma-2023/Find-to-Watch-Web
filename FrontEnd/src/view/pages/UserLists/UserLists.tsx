@@ -4,8 +4,10 @@ import { getAllLists } from "../../../app/services/gets/getAllLists";
 import type { Lista } from "../../../app/interfaces/list";
 import { deleteList } from "../../../app/services/deletes/deleteList";
 import { updateList } from "../../../app/services/puts/updateList";
+import { createList } from "../../../app/services/posts/createList";
 import UpdateListModal from "../../components/UpdateListModal/UpdateListModal";
-import { Pencil, Trash2 } from "lucide-react";
+import CreateListModal from "../../components/CreateListModal/CreateListModal";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import HeaderPage from "../../components/header";
 
 export default function UserLists() {
@@ -15,6 +17,7 @@ export default function UserLists() {
   const [erro, setErro] = useState("");
   const [selectedList, setSelectedList] = useState<Lista | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchListas = async () => {
@@ -84,6 +87,20 @@ export default function UserLists() {
     }
   };
 
+  const handleCreate = async (name: string, isPublic: boolean) => {
+    try {
+      const newList = await createList({ name, isPublic });
+      if (newList) {
+        setListas([...listas, newList]);
+      }
+      return newList;
+    } catch (error) {
+      console.error("Erro ao criar lista:", error);
+      alert("Erro ao criar lista. Tente novamente.");
+      return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -105,15 +122,29 @@ export default function UserLists() {
     <div className="flex h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
       <HeaderPage />
       <div className="px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 border-b border-gray-700 pb-4">
-          <h2 className="text-3xl font-bold text-white">Minhas Listas</h2>
-          <p className="mt-1 text-gray-300">Gerencie e acesse suas coleções</p>
+        <div className="mb-8 flex items-center justify-between border-b border-gray-700 pb-4">
+          <div>
+            <h2 className="text-3xl font-bold text-white">Minhas Listas</h2>
+            <p className="mt-1 text-gray-300">
+              Gerencie e acesse suas coleções
+            </p>
+          </div>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1f1f1f] focus:outline-none"
+          >
+            <Plus size={20} />
+            <span className="hidden sm:inline">Nova Lista</span>
+          </button>
         </div>
 
         {listas.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-gray-600 bg-gray-800 py-12 text-center">
             <p className="text-lg text-gray-400">Nenhuma lista encontrada.</p>
-            <button className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700">
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+            >
               Criar nova lista
             </button>
           </div>
@@ -188,6 +219,12 @@ export default function UserLists() {
           onClose={() => setIsUpdateModalOpen(false)}
           onUpdate={handleUpdate}
           lista={selectedList}
+        />
+
+        <CreateListModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreate={handleCreate}
         />
       </div>
     </div>
