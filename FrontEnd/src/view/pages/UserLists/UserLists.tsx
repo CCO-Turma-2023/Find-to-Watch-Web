@@ -6,10 +6,11 @@ import { deleteList } from "../../../app/services/deletes/deleteList";
 import { updateList } from "../../../app/services/puts/updateList";
 import { createList } from "../../../app/services/posts/createList";
 import UpdateListModal from "../../components/UpdateListModal/UpdateListModal";
-import CreateListModal from "../../components/CreateListModal/createListModal";
+
 import { Pencil, Trash2, Plus, Share2 } from "lucide-react";
 import HeaderPage from "../../components/header";
 import { useToast } from "../../../app/contexts/contexts";
+import CreateListModal from "../../components/CreateListModal";
 
 export default function UserLists() {
   const navigate = useNavigate();
