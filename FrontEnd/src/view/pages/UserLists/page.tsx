@@ -140,7 +140,9 @@ export default function UserLists() {
 
   return (
     <div className="flex min-h-screen w-full flex-col gap-2 bg-[#0a0a0a]">
-      <HeaderPage />
+      <div className="bg-gradient-to-b from-black/90 to-transparent px-4 pt-4 pb-8 transition-all duration-300">
+        <HeaderPage />
+      </div>
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between border-b border-gray-700 pb-4">
           <div>

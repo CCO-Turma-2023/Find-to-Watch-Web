@@ -139,7 +139,10 @@ export default function ListDetails() {
 
   return (
     <div className="flex min-h-screen w-full flex-col gap-2 bg-[#0a0a0a]">
-      <HeaderPage />
+      <div className="bg-gradient-to-b from-black/90 to-transparent px-4 pt-4 pb-8 transition-all duration-300">
+        <HeaderPage />
+      </div>
+
       <motion.button
         className="relative top-4 left-4 z-30 flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12"
         whileHover={{ scale: 1.05 }}

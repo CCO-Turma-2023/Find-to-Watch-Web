@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import HeaderPage from "../../components/header";
 import ContentType from "../../components/contentType";
 import ContentInfos from "../../components/contentInfos";
 import { getMedias } from "../../../app/services/gets/getMedias";
@@ -231,10 +230,6 @@ export default function HomeLayout() {
           onClose={() => setShowModal(false)}
         />
       )}
-
-      <div className="fixed top-0 right-0 left-0 z-50 bg-gradient-to-b from-black/90 to-transparent px-4 pt-4 pb-8 transition-all duration-300">
-        <HeaderPage />
-      </div>
 
       {/* --- HERO SECTION --- */}
       <div className="relative h-[95vh] w-full">
