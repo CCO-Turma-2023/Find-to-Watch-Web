@@ -48,7 +48,7 @@ class ListasServices {
     }
 
     // 2. Se a lista NÃO é pública (Privada):
-    
+
     // Verifica se existe um usuário logado
     if (!userId) {
       const error = new Error("Esta lista é privada. Faça login para acessar.");
@@ -59,7 +59,9 @@ class ListasServices {
     // Verifica se o usuário logado é o dono da lista
     // Usar String() e trim() é boa prática para comparar IDs
     if (lista.user_id !== userId) {
-      const error = new Error("Você não tem permissão para visualizar esta lista privada.");
+      const error = new Error(
+        "Você não tem permissão para visualizar esta lista privada."
+      );
       error.statusCode = 403; // Forbidden
       throw error;
     }
@@ -70,25 +72,25 @@ class ListasServices {
   // Replique a mesma lógica para o getMediaByListId
   async getMediaByListId(userId, listId) {
     const lista = await this.listasRepository.getListasById(listId);
-    
+
     if (!lista) {
       throw new Error("Lista não encontrada");
     }
 
     // Lógica de Permissão
     const isOwner = userId && lista.user_id === userId;
-    
+
     // Se não for pública E não for o dono => Erro
     if (!lista.isPublic && !isOwner) {
-       if (!userId) {
-          const error = new Error("Autenticação necessária");
-          error.statusCode = 401;
-          throw error;
-       } else {
-          const error = new Error("Sem permissão");
-          error.statusCode = 403;
-          throw error;
-       }
+      if (!userId) {
+        const error = new Error("Autenticação necessária");
+        error.statusCode = 401;
+        throw error;
+      } else {
+        const error = new Error("Sem permissão");
+        error.statusCode = 403;
+        throw error;
+      }
     }
 
     return await this.listasRepository.getMediaByListId(listId);
@@ -120,6 +122,25 @@ class ListasServices {
     }
 
     return await this.listasRepository.deleteListas(listId);
+  }
+
+  async removeMedia(userId, listId, mediaId) {
+    const lista = await this.listasRepository.getListasById(listId);
+
+    if (!lista) {
+      throw new Error("Lista não encontrada");
+    }
+
+    if (lista.user_id !== userId) {
+      throw new Error("Você não tem permissão para remover itens desta lista");
+    }
+
+    const removed = await this.listasRepository.removeMedia(listId, mediaId);
+    if (!removed) {
+      throw new Error("Item não encontrado na lista ou erro ao remover");
+    }
+
+    return removed;
   }
 }
 

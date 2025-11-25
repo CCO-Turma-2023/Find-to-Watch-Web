@@ -90,6 +90,22 @@ class ListasRepository {
     await db.query("DELETE FROM listas WHERE id = $1", [id]);
     return { message: "Lista deletada com sucesso" };
   }
+
+  async removeMedia(list_id, media_id) {
+    try {
+      const query = `
+        DELETE FROM listMedia 
+        WHERE list_id = $1 AND media_id = $2
+        RETURNING *;
+      `;
+      const values = [list_id, media_id];
+      const { rows } = await db.query(query, values);
+      return rows[0] || null;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new ListasRepository();

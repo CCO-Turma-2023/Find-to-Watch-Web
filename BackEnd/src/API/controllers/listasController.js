@@ -100,6 +100,25 @@ class ListasController {
       return res.status(404).json({ message: error.message });
     }
   }
+
+  async removeMedia(req, res) {
+    try {
+      const userId = req.userId;
+      const { id } = req.params; // ID da lista
+      const { media_id } = req.body; // ID da mídia a remover
+
+      if (!media_id) {
+        return res.status(400).json({ message: "media_id é obrigatório" });
+      }
+
+      await listasServices.removeMedia(userId, id, media_id);
+
+      return res.status(200).json({ message: "Item removido com sucesso" });
+    } catch (error) {
+      const statusCode = error.message.includes("permissão") ? 403 : 404;
+      return res.status(statusCode).json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new ListasController();

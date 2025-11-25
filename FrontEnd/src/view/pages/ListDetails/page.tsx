@@ -4,31 +4,43 @@ import { motion } from "framer-motion";
 import { getListById } from "../../../app/services/gets/getListById";
 import { getMediaByListId } from "../../../app/services/gets/getMediaByListId";
 import { getMediaDetails } from "../../../app/services/gets/getMediaDetails";
-import { getUserById, type UserPublicProfile } from "../../../app/services/gets/getUserById"; // Import novo
+import {
+  getUserById,
+  type UserPublicProfile,
+} from "../../../app/services/gets/getUserById";
+import { removeMediaFromList } from "../../../app/services/deletes/removeMediaFromList";
+import { decodeToken } from "../../../app/services/api.service";
+import { useToast } from "../../../app/contexts/contexts";
 import HeaderPage from "../../components/header";
 import MediaContent from "../../components/mediaContent";
 import LeftArrow from "../../assets/icons/leftArrow";
 import type { Lista } from "../../../app/interfaces/list";
 import type { Media } from "../../../app/interfaces/media";
-import { User, Calendar, Film, Tv } from "lucide-react"; // Ícones para embelezar
+import { User, Calendar, Film, Tv, Trash2 } from "lucide-react";
 
 export default function ListDetails() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  
+
   const [lista, setLista] = useState<Lista | null>(null);
-  const [owner, setOwner] = useState<UserPublicProfile | null>(null); // Estado do dono
-  const [movies, setMovies] = useState<Media[]>([]); // Estado separado
-  const [series, setSeries] = useState<Media[]>([]); // Estado separado
-  
+  const [owner, setOwner] = useState<UserPublicProfile | null>(null);
+  const [movies, setMovies] = useState<Media[]>([]);
+  const [series, setSeries] = useState<Media[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const { showToast } = useToast();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    const token = decodeToken();
+    if (token) {
+      setCurrentUserId(token.id);
+    }
+
     const fetchData = async () => {
       if (!id) return;
       try {
-        // 1. Busca dados iniciais da lista e os IDs das mídias
         const [listData, mediaData] = await Promise.all([
           getListById(id),
           getMediaByListId(id),
@@ -36,26 +48,21 @@ export default function ListDetails() {
 
         setLista(listData);
 
-        // 2. Com o ID do usuário da lista, buscamos os dados do dono
         if (listData.user_id) {
-           try {
-             const userData = await getUserById(listData.user_id);
-             setOwner(userData);
-           } catch (err) {
-             console.error("Erro ao buscar dono da lista", err);
-             // Não bloqueamos a tela se falhar o usuário, apenas não mostra
-           }
+          try {
+            const userData = await getUserById(listData.user_id);
+            setOwner(userData);
+          } catch (err) {
+            console.error("Erro ao buscar dono da lista", err);
+          }
         }
 
-        // 3. Busca detalhes de cada mídia
         const detailedMedias = await Promise.all(
-          mediaData.map(async (item: { media_id: string }) => { 
+          mediaData.map(async (item: { media_id: string }) => {
             const mediaId = item.media_id;
-            // Tenta buscar como filme
             let details = await getMediaDetails(mediaId, "movie");
             if (details) return { ...details, type: "movie" };
 
-            // Se não encontrar, tenta buscar como série
             details = await getMediaDetails(mediaId, "tv");
             if (details) return { ...details, type: "tv" };
 
@@ -63,12 +70,12 @@ export default function ListDetails() {
           }),
         );
 
-        const validMedias = detailedMedias.filter((m): m is Media => m !== null);
-        
-        // 4. Separação por tipo
+        const validMedias = detailedMedias.filter(
+          (m): m is Media => m !== null,
+        );
+
         setMovies(validMedias.filter((m) => m.type === "movie"));
         setSeries(validMedias.filter((m) => m.type === "tv"));
-
       } catch (error) {
         console.error(error);
         setErro("Não foi possível carregar os detalhes da lista.");
@@ -80,17 +87,43 @@ export default function ListDetails() {
     fetchData();
   }, [id]);
 
+  const handleRemoveMedia = async (mediaId: number) => {
+    if (!id) return;
+    if (!window.confirm("Tem certeza que deseja remover este item da lista?"))
+      return;
+
+    try {
+      await removeMediaFromList(id, mediaId);
+
+      setMovies((prev) => prev.filter((m) => m.id !== mediaId));
+      setSeries((prev) => prev.filter((m) => m.id !== mediaId));
+
+      showToast({
+        severity: "success",
+        summary: "Sucesso",
+        detail: "Item removido da lista.",
+      });
+    } catch (error) {
+      console.error("Erro ao remover item:", error);
+      showToast({
+        severity: "error",
+        summary: "Erro",
+        detail: "Não foi possível remover o item.",
+      });
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#1f1f1f]">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+      <div className="flex h-screen items-center justify-center bg-[#0a0a0a]">
+        <div className="h-12 w-12 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (erro || !lista) {
     return (
-      <div className="flex h-screen flex-col bg-[#1f1f1f]">
+      <div className="flex h-screen flex-col bg-[#0a0a0a]">
         <HeaderPage />
         <div className="flex flex-1 items-center justify-center p-4">
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center text-red-600">
@@ -102,8 +135,10 @@ export default function ListDetails() {
     );
   }
 
+  const isOwner = currentUserId && lista.user_id === currentUserId;
+
   return (
-    <div className="flex min-h-screen w-full flex-col gap-2 bg-[#1f1f1f]">
+    <div className="flex min-h-screen w-full flex-col gap-2 bg-[#0a0a0a]">
       <HeaderPage />
       <motion.button
         className="relative top-4 left-4 z-30 flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#1B1B1BE5] md:h-12 md:w-12"
@@ -114,15 +149,12 @@ export default function ListDetails() {
         <LeftArrow />
       </motion.button>
       <div className="px-4 py-8 sm:px-6 lg:px-8">
-        
-        {/* Cabeçalho da Lista */}
         <div className="mb-8 border-b border-gray-700 pb-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 className="text-4xl font-bold text-white">{lista.name}</h2>
-              
+
               <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-400">
-                {/* Status Pública/Privada */}
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                     lista.isPublic
@@ -133,19 +165,23 @@ export default function ListDetails() {
                   {lista.isPublic ? "Pública" : "Privada"}
                 </span>
 
-                {/* Data de Criação */}
                 <div className="flex items-center gap-1.5">
                   <Calendar size={16} />
                   <span>
-                    Criada em {new Date(lista.created_at).toLocaleDateString("pt-BR")}
+                    Criada em{" "}
+                    {new Date(lista.created_at).toLocaleDateString("pt-BR")}
                   </span>
                 </div>
 
-                {/* Informação do Usuário (Dono) */}
                 {owner && (
                   <div className="flex items-center gap-1.5 border-l border-gray-600 pl-4 text-blue-400">
                     <User size={16} />
-                    <span>Por: <span className="font-semibold text-blue-300">{owner.username}</span></span>
+                    <span>
+                      Por:{" "}
+                      <span className="font-semibold text-blue-300">
+                        {owner.username}
+                      </span>
+                    </span>
                   </div>
                 )}
               </div>
@@ -153,57 +189,87 @@ export default function ListDetails() {
           </div>
         </div>
 
-        {/* Conteúdo Vazio */}
         {movies.length === 0 && series.length === 0 && (
           <div className="rounded-xl border-2 border-dashed border-gray-600 bg-gray-800 py-12 text-center">
             <p className="text-lg text-gray-400">Esta lista está vazia.</p>
           </div>
         )}
 
-        {/* Seção de Filmes */}
         {movies.length > 0 && (
           <div className="mb-10">
             <div className="mb-4 flex items-center gap-2 text-2xl font-bold text-white">
               <Film className="text-blue-500" />
               <h3>Filmes</h3>
-              <span className="ml-2 text-sm font-normal text-gray-500">({movies.length})</span>
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                ({movies.length})
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {movies.map((media) => (
-                <div key={media.id} className="flex justify-center transition-transform hover:scale-105">
+                <div
+                  key={media.id}
+                  className="group relative flex justify-center transition-transform hover:scale-105"
+                >
                   <MediaContent
                     id={media.id}
                     urlImage={media.poster_path}
                     type="movie"
                   />
+                  {isOwner && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveMedia(media.id);
+                      }}
+                      className="absolute top-2 right-2 z-10 cursor-pointer rounded-full bg-red-600 p-1.5 text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 hover:bg-red-700"
+                      title="Remover da lista"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Seção de Séries */}
         {series.length > 0 && (
           <div>
             <div className="mb-4 flex items-center gap-2 text-2xl font-bold text-white">
               <Tv className="text-purple-500" />
               <h3>Séries</h3>
-              <span className="ml-2 text-sm font-normal text-gray-500">({series.length})</span>
+              <span className="ml-2 text-sm font-normal text-gray-500">
+                ({series.length})
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {series.map((media) => (
-                <div key={media.id} className="flex justify-center transition-transform hover:scale-105">
+                <div
+                  key={media.id}
+                  className="group relative flex justify-center transition-transform hover:scale-105"
+                >
                   <MediaContent
                     id={media.id}
                     urlImage={media.poster_path}
                     type="tv"
                   />
+                  {isOwner && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveMedia(media.id);
+                      }}
+                      className="absolute top-2 right-2 z-10 cursor-pointer rounded-full bg-red-600 p-1.5 text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 hover:bg-red-700"
+                      title="Remover da lista"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

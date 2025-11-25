@@ -47,7 +47,7 @@ export default function UpdateListModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-[#1f1f1f] p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-gray-700 bg-black p-6 shadow-xl">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">Editar Lista</h2>
           <button

@@ -342,16 +342,25 @@ const optionalAuthMiddleware = require("../middlewares/optionalAuthMiddleware");
  *         description: Erro interno
  */
 
-router.get("/getMediaByListId/:id", optionalAuthMiddleware, listasController.getMediaByListId);
+router.get(
+  "/getMediaByListId/:id",
+  optionalAuthMiddleware,
+  listasController.getMediaByListId
+);
 router.post("/insertMedia/:id", authMiddleware, listasController.insertMedia);
 router.post("/createListas", authMiddleware, listasController.createListas);
 router.get("/getAllUserLists", authMiddleware, listasController.getAllLists);
-router.get("/getListasById/:id", optionalAuthMiddleware, listasController.getListasById);
+router.get(
+  "/getListasById/:id",
+  optionalAuthMiddleware,
+  listasController.getListasById
+);
 router.put("/updateListas/:id", authMiddleware, listasController.updateListas);
 router.delete(
   "/deleteListas/:id",
   authMiddleware,
   listasController.deleteListas
 );
+router.delete("/removeMedia/:id", authMiddleware, listasController.removeMedia);
 
 module.exports = router;
